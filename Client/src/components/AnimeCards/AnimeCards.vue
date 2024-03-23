@@ -3,15 +3,8 @@
     <div v-for="(anime, i) in props.data" :key="i">
       <p>
         {{
-          anime.attributes.abbreviatedTitles[2] !== "" &&
-          anime.attributes.abbreviatedTitles[2]
-            ? anime.attributes.abbreviatedTitles[2]
-            : anime.attributes.abbreviatedTitles[1] !== "" &&
-              anime.attributes.abbreviatedTitles[1]
-            ? anime.attributes.abbreviatedTitles[1]
-            : anime.attributes.abbreviatedTitles[0] !== "" &&
-              anime.attributes.abbreviatedTitles[0]
-            ? anime.attributes.abbreviatedTitles[0]
+          anime.attributes.abbreviatedTitles.length > 0
+            ? compareLengths(anime.attributes.abbreviatedTitles)
             : anime.attributes.canonicalTitle
         }}
       </p>
@@ -23,6 +16,7 @@
 <script setup>
 import { ref } from "vue";
 const props = defineProps(["data"]);
+import { compareLengths } from "../../utils/compareLengths";
 </script>
 
 <style scoped>

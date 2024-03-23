@@ -1,5 +1,5 @@
 <template>
-  <section>
+  <section class="main-section">
     <AnimeCard :data="data" />
   </section>
 </template>
@@ -29,8 +29,5 @@ onMounted(() => {
 
 <style scoped>
 .main-div {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  column-gap: 10px;
 }
 </style>
