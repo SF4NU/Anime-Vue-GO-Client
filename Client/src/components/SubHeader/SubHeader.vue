@@ -1,8 +1,13 @@
 <template>
   <header>
     <div class="search-div">
-      <input class="search-bar" type="text" placeholder="Inserisci Anime" />
-      <button>Cerca</button>
+      <input
+        @keypress.enter="sendInput($emit)"
+        v-model="userInput"
+        class="search-bar"
+        type="text"
+        placeholder="Inserisci Anime" />
+      <button @click="sendInput($emit)">Cerca</button>
     </div>
     <div class="filter-div">
       <button class="dropdown-button">Filtri</button>
@@ -15,7 +20,14 @@
   </header>
 </template>
 
-<script setup></script>
+<script setup>
+import { ref } from "vue";
+const userInput = ref("");
+
+const sendInput = (emit) => {
+  emit("getUserInput", userInput.value);
+};
+</script>
 
 <style scoped>
 header {
