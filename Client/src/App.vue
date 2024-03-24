@@ -14,7 +14,7 @@ import SubHeader from "./components/SubHeader/SubHeader.vue";
 import axios from "axios";
 
 const data = ref(null);
-const searchedAnime = ref("Naruto");
+const searchedAnime = ref("");
 const page = ref(0);
 const isLoading = ref(false);
 const getUserInput = (input) => {

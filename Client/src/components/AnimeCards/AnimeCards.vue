@@ -1,17 +1,40 @@
 <template>
   <div class="main-anime-card-div">
-    <div v-for="(anime, i) in props.data" :key="i">
-      <p>
-        {{
-          anime.attributes.abbreviatedTitles.length > 0
-            ? compareLengths(anime.attributes.abbreviatedTitles)
-            : anime.attributes.canonicalTitle
-        }}
-      </p>
+    <div v-for="(anime, i) in props.data" :key="i" class="main-anime-display">
       <div v-if="!props.isLoading">
         <img :src="anime.attributes.posterImage.tiny" alt="" />
       </div>
       <div v-else-if="props.isLoading" class="loader"></div>
+      <div class="card-details">
+        <div>
+          <span class="title">
+            {{
+              anime.attributes.canonicalTitle.length > 20 &&
+              anime.attributes.abbreviatedTitles.length > 0
+                ? compareLengths(anime.attributes.abbreviatedTitles)
+                : anime.attributes.canonicalTitle
+            }}
+          </span>
+        </div>
+        <div class="year-ep-count">
+          <span class="episode-count">
+            {{
+              anime.attributes.episodeCount > 1
+                ? "Episodi: " + anime.attributes.episodeCount
+                : anime.attributes.episodeCount === null
+                ? "N/A"
+                : "Film"
+            }}
+          </span>
+          <span class="year">
+            {{
+              anime.attributes.endDate
+                ? "Anno: " + getYear(anime.attributes.endDate)
+                : "In corso"
+            }}
+          </span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -20,6 +43,7 @@
 import { ref, watch } from "vue";
 const props = defineProps(["data", "isLoading"]);
 import { compareLengths } from "../../utils/compareLengths";
+import { getYear } from "../../utils/getYear";
 
 watch(
   () => props.isLoading,
@@ -31,9 +55,57 @@ watch(
 
 <style scoped>
 .main-anime-card-div {
+  margin-top: 55px;
+
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
-  column-gap: 10px;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 10px;
+  width: 80%;
+  margin-right: auto;
+  margin-left: auto;
+  user-select: none;
+  -moz-user-select: none;
+}
+.main-anime-display {
+  display: flex;
+  column-gap: 20px;
+  padding: 10px 10px;
+  padding-left: 20px;
+  background-color: var(--dark-blue);
+  border-radius: 15px;
+}
+.title {
+  font-weight: 500;
+  font-size: 1.1rem;
+  color: var(--yellow);
+}
+.title:hover {
+  text-decoration: underline;
+  cursor: pointer;
+}
+.title:active {
+  filter: brightness(1.1);
+}
+.card-details {
+  display: flex;
+  flex-direction: column;
+  line-height: 30px;
+}
+.episode-count,
+.year {
+  color: var(--dark-blue);
+  background-color: var(--green);
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 5px;
+}
+.year {
+  margin-left: 20px;
+}
+.year-ep-count {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
 }
 .loader {
   width: 50px;
