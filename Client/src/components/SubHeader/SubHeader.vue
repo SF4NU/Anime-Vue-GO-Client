@@ -37,6 +37,7 @@ header {
   flex-direction: row;
   align-items: center;
   justify-content: space-around;
+  width: 100%;
 }
 .search-div {
   display: flex;
@@ -111,5 +112,10 @@ header {
 }
 .dropdown-menu span:hover {
   filter: brightness(1.1);
+}
+@media (max-width: 450px) {
+  .search-div button {
+    display: none;
+  }
 }
 </style>

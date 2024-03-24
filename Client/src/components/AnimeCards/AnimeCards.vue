@@ -2,7 +2,10 @@
   <div class="main-anime-card-div">
     <div v-for="(anime, i) in props.data" :key="i" class="main-anime-display">
       <div v-if="!props.isLoading">
-        <img :src="anime.attributes.posterImage.tiny" alt="" />
+        <img
+          class="anime-poster"
+          :src="anime.attributes.posterImage.tiny"
+          alt="" />
       </div>
       <div v-else-if="props.isLoading" class="loader"></div>
       <div class="card-details">
@@ -34,6 +37,10 @@
             }}
           </span>
         </div>
+        <div class="genres-div">
+          <span> </span>
+          <span></span>
+        </div>
       </div>
     </div>
   </div>
@@ -44,6 +51,7 @@ import { ref, watch } from "vue";
 const props = defineProps(["data", "isLoading"]);
 import { compareLengths } from "../../utils/compareLengths";
 import { getYear } from "../../utils/getYear";
+import { ratingConverter } from "../../utils/ratingConverter";
 
 watch(
   () => props.isLoading,
@@ -58,13 +66,33 @@ watch(
   margin-top: 55px;
 
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(430px, 1fr));
   gap: 10px;
   width: 80%;
   margin-right: auto;
   margin-left: auto;
   user-select: none;
   -moz-user-select: none;
+}
+@media (max-width: 550px) {
+  .main-anime-card-div {
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  }
+  .main-anime-display {
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 500px;
+  }
+  .anime-poster {
+    height: 250px;
+    margin-top: -75px;
+    margin-bottom: 25px;
+  }
+  .card-details {
+    align-items: center;
+    justify-content: center;
+  }
 }
 .main-anime-display {
   display: flex;
@@ -99,13 +127,13 @@ watch(
   padding: 5px 10px;
   border-radius: 5px;
 }
-.year {
-  margin-left: 20px;
-}
 .year-ep-count {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
+  gap: 15px;
+  align-items: center;
+  justify-content: center;
 }
 .loader {
   width: 50px;

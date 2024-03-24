@@ -26,7 +26,7 @@ const FetchAnime = async () => {
   try {
     isLoading.value = true;
     const res = await axios.get(
-      `https://kitsu.io/api/edge/anime?filter[text]=${searchedAnime.value}&page[limit]=15`
+      `https://kitsu.io/api/edge/anime?filter[text]=${searchedAnime.value}&page[limit]=16`
     );
     data.value = res.data.data;
     console.log(data.value);
