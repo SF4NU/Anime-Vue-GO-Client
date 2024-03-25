@@ -37,10 +37,15 @@
             }}
           </span>
         </div>
-        <div class="genres-div">
-          <span> </span>
-          <span></span>
-        </div>
+      </div>
+      <div class="rating-div">
+        <img
+          height="25px"
+          src="../../assets/star-circle-svgrepo-com.svg"
+          alt="" />
+        <span>
+          {{ ratingConverter(anime.attributes.averageRating) }}
+        </span>
       </div>
     </div>
   </div>
@@ -101,6 +106,7 @@ watch(
   padding-left: 20px;
   background-color: var(--dark-blue);
   border-radius: 15px;
+  position: relative;
 }
 .title {
   font-weight: 500;
@@ -115,6 +121,7 @@ watch(
   filter: brightness(1.1);
 }
 .card-details {
+  position: relative;
   display: flex;
   flex-direction: column;
   line-height: 30px;
@@ -126,6 +133,7 @@ watch(
   font-weight: 600;
   padding: 5px 10px;
   border-radius: 5px;
+  box-shadow: inset -5px -5px 5px rgba(0, 0, 0, 0.15);
 }
 .year-ep-count {
   display: flex;
@@ -141,6 +149,19 @@ watch(
   border-radius: 50%;
   border: 8px solid #514b82;
   animation: l20-1 0.8s infinite linear alternate, l20-2 1.6s infinite linear;
+}
+.rating-div {
+  position: absolute;
+  bottom: 15px;
+  right: 25px;
+  background-color: var(--orange);
+  padding: 5px 10px;
+  border-radius: 25px;
+  font-weight: 600;
+  color: var(--dark-blue);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 @keyframes l20-1 {
   0% {
