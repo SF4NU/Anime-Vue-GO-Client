@@ -93,6 +93,7 @@ watch(
   margin-left: auto;
   user-select: none;
   -moz-user-select: none;
+  margin-bottom: 150px;
 }
 @media (max-width: 550px) {
   .main-anime-card-div {

@@ -115,10 +115,21 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onMounted } from "vue";
 import { ratingConverter } from "@/utils/ratingConverter";
 
 const props = defineProps(["passIndex", "data"]);
+
+const scrollToTop = () => {
+  window.scrollTo({
+    top: 0,
+    behavior: "smooth",
+  });
+};
+
+onMounted(() => {
+  scrollToTop();
+});
 </script>
 
 <style scoped>
