@@ -1,7 +1,7 @@
 <template>
   <div class="main-anime-card-div">
     <div v-for="(anime, i) in props.data" :key="i" class="main-anime-display">
-      <div v-if="!props.isLoading">
+      <div v-if="!props.isLoading" class="poster-div">
         <img
           class="anime-poster"
           :src="anime.attributes.posterImage.tiny"
@@ -47,6 +47,20 @@
           {{ ratingConverter(anime.attributes.averageRating) }}
         </span>
       </div>
+      <div
+        class="trailer-link-div"
+        :data-tooltip="`https://www.youtube.com/watch?v=${anime.attributes.youtubeVideoId}`">
+        <span
+          ><a
+            :href="`https://www.youtube.com/watch?v=${anime.attributes.youtubeVideoId}`"
+            target="_blank"
+            class="watch-link">
+            <img
+              class="watch-img"
+              src="../../assets/youtube-svgrepo-com.svg"
+              alt="" /> </a
+        ></span>
+      </div>
     </div>
   </div>
 </template>
@@ -91,12 +105,13 @@ watch(
   }
   .anime-poster {
     height: 250px;
-    margin-top: -75px;
-    margin-bottom: 25px;
+    margin-top: -50px;
   }
   .card-details {
     align-items: center;
     justify-content: center;
+    padding-bottom: 20px;
+    row-gap: 25px;
   }
 }
 .main-anime-display {
@@ -107,6 +122,7 @@ watch(
   background-color: var(--dark-blue);
   border-radius: 15px;
   position: relative;
+  box-shadow: -5px -5px 10px rgba(0, 0, 0, 0.2);
 }
 .title {
   font-weight: 500;
@@ -125,6 +141,7 @@ watch(
   display: flex;
   flex-direction: column;
   line-height: 30px;
+  padding-top: 20px;
 }
 .episode-count,
 .year {
@@ -162,6 +179,46 @@ watch(
   display: flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.15);
+}
+.anime-poster {
+  border: 10px var(--green) solid;
+  border-radius: 25px;
+  box-shadow: 5px 5px 5px rgba(0, 0, 0, 0.15);
+  cursor: pointer;
+}
+.anime-poster:hover {
+  filter: brightness(1.1);
+}
+.watch-img {
+  height: 45px;
+  cursor: pointer;
+}
+.watch-img:hover {
+  filter: brightness(0.65);
+}
+.trailer-link-div {
+  position: absolute;
+  bottom: 6px;
+  right: 120px;
+}
+.trailer-link-div::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: 45px;
+  left: -105px;
+  z-index: 10;
+  background-color: rgb(172, 172, 172);
+  padding: 5px;
+  border-radius: 10px;
+  opacity: 0;
+  pointer-events: none;
+  scale: 0;
+  transition: opacity 0.25s ease, scale 0.15s ease;
+}
+.trailer-link-div:hover::before {
+  opacity: 0.95;
+  scale: 1;
 }
 @keyframes l20-1 {
   0% {

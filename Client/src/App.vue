@@ -1,8 +1,8 @@
 <template>
   <section class="main-section">
     <Header />
-    <SubHeader @getUserInput="getUserInput" />
-    <AnimeCard :data="data" :isLoading="isLoading" />
+    <SubHeader @getUserInput="getUserInput" v-if="!toggleSubHeader" />
+    <AnimeCard :data="data" :isLoading="isLoading" v-if="!toggleAnimeCards" />
   </section>
 </template>
 
@@ -17,6 +17,9 @@ const data = ref(null);
 const searchedAnime = ref("");
 const page = ref(0);
 const isLoading = ref(false);
+const toggleSubHeader = ref(false);
+const toggleAnimeCards = ref(false);
+
 const getUserInput = (input) => {
   searchedAnime.value = input;
   FetchAnime();
@@ -26,7 +29,7 @@ const FetchAnime = async () => {
   try {
     isLoading.value = true;
     const res = await axios.get(
-      `https://kitsu.io/api/edge/anime?filter[text]=${searchedAnime.value}&page[limit]=16`
+      `https://kitsu.io/api/edge/anime?filter[text]=${searchedAnime.value}&page[limit]=15`
     );
     data.value = res.data.data;
     console.log(data.value);
