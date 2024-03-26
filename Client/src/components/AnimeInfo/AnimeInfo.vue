@@ -50,7 +50,7 @@
             <span>In onda fino al: </span>
             <span>
               {{
-                props.data[passIndex].attributes.endDate === ""
+                props.data[passIndex].attributes.endDate !== null
                   ? props.data[passIndex].attributes.endDate
                   : "N/A"
               }}</span
