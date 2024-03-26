@@ -10,7 +10,8 @@
     <AnimeInfo
       :data="data"
       :passIndex="passIndex"
-      v-else-if="toggleAnimeFocus" />
+      v-else-if="toggleAnimeFocus"
+      @backToAnime="backToAnime" />
   </section>
 </template>
 
@@ -36,7 +37,11 @@ const focusOnAnime = (i) => {
   toggleAnimeCards.value = true;
   toggleAnimeFocus.value = true;
   passIndex.value = i;
-  console.log(passIndex.value);
+};
+const backToAnime = () => {
+  toggleSubHeader.value = false;
+  toggleAnimeCards.value = false;
+  toggleAnimeFocus.value = false;
 };
 
 const getUserInput = (input) => {
@@ -80,5 +85,7 @@ onMounted(() => {
 body {
   margin: 0;
   font-family: Rubik;
+  background: linear-gradient(to bottom right, var(--green), var(--dark-blue));
+  min-height: 100dvh;
 }
 </style>

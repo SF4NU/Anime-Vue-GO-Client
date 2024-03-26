@@ -5,7 +5,8 @@
         <img
           class="anime-poster"
           :src="anime.attributes.posterImage.tiny"
-          alt="" />
+          :alt="anime.attributes.canonicalTitle + ' poster'"
+          @click="$emit('focusOnAnime', i)" />
       </div>
       <div v-else-if="props.isLoading" class="loader"></div>
       <div class="card-details">
@@ -58,7 +59,7 @@
             <img
               class="watch-img"
               src="../../assets/youtube-svgrepo-com.svg"
-              alt="" /> </a
+              alt="watch-youtube-image" /> </a
         ></span>
       </div>
     </div>

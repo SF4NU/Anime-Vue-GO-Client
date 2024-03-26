@@ -14,13 +14,14 @@
 <style scoped>
 header {
   height: 60px;
-  background-color: #43aa8b;
-  color: var(--dark-blue);
+  background-color: var(--dark-blue); /* Add this line */
+  color: var(--yellow);
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-weight: 500;
   font-size: 1rem;
+  box-shadow: 0px 5px 5px rgba(0, 0, 0, 0.25);
 }
 header span {
   cursor: pointer;

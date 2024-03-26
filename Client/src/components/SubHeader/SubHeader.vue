@@ -32,12 +32,13 @@ const sendInput = (emit) => {
 <style scoped>
 header {
   height: 80px;
-  background-color: rgb(197, 197, 197);
+  background: linear-gradient(to top right, var(--green), var(--dark-blue));
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: space-around;
   width: 100%;
+  border-bottom: 1px solid var(--dark-blue);
 }
 .search-div {
   display: flex;
