@@ -2,7 +2,15 @@
   <section class="main-section">
     <Header />
     <SubHeader @getUserInput="getUserInput" v-if="!toggleSubHeader" />
-    <AnimeCard :data="data" :isLoading="isLoading" v-if="!toggleAnimeCards" />
+    <AnimeCard
+      :data="data"
+      :isLoading="isLoading"
+      @focusOnAnime="focusOnAnime"
+      v-if="!toggleAnimeCards" />
+    <AnimeInfo
+      :data="data"
+      :passIndex="passIndex"
+      v-else-if="toggleAnimeFocus" />
   </section>
 </template>
 
@@ -11,6 +19,7 @@ import { onMounted, ref, watch } from "vue";
 import AnimeCard from "./components/AnimeCards/AnimeCards.vue";
 import Header from "./components/Header/Header.vue";
 import SubHeader from "./components/SubHeader/SubHeader.vue";
+import AnimeInfo from "./components/AnimeInfo/AnimeInfo.vue";
 import axios from "axios";
 
 const data = ref(null);
@@ -19,6 +28,16 @@ const page = ref(0);
 const isLoading = ref(false);
 const toggleSubHeader = ref(false);
 const toggleAnimeCards = ref(false);
+const toggleAnimeFocus = ref(false);
+const passIndex = ref(null);
+
+const focusOnAnime = (i) => {
+  toggleSubHeader.value = true;
+  toggleAnimeCards.value = true;
+  toggleAnimeFocus.value = true;
+  passIndex.value = i;
+  console.log(passIndex.value);
+};
 
 const getUserInput = (input) => {
   searchedAnime.value = input;

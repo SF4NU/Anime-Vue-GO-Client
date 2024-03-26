@@ -10,7 +10,7 @@
       <div v-else-if="props.isLoading" class="loader"></div>
       <div class="card-details">
         <div>
-          <span class="title">
+          <span class="title" @click="$emit('focusOnAnime', i)">
             {{
               anime.attributes.canonicalTitle.length > 20 &&
               anime.attributes.abbreviatedTitles.length > 0
