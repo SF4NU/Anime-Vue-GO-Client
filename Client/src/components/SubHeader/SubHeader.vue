@@ -6,7 +6,9 @@
         v-model="userInput"
         class="search-bar"
         type="text"
-        placeholder="Inserisci Anime" />
+        :placeholder="
+          props.toggleMangaCards ? 'Inserisci manga' : 'Inserisci anime'
+        " />
       <button @click="sendInput($emit)">Cerca</button>
     </div>
     <div class="filter-div">
@@ -23,6 +25,7 @@
 <script setup>
 import { ref } from "vue";
 const userInput = ref("");
+const props = defineProps(["toggleMangaCards"]);
 
 const sendInput = (emit) => {
   emit("getUserInput", userInput.value);

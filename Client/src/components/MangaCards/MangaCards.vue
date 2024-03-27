@@ -26,19 +26,15 @@
         <div class="year-ep-count">
           <span class="episode-count">
             {{
-              manga.attributes.episodeCount > 1
-                ? "Episodi: " + manga.attributes.episodeCount
-                : manga.attributes.episodeCount === null
+              manga.attributes.chapterCount > 1
+                ? "Capitoli: " + manga.attributes.chapterCount
+                : manga.attributes.chapterCount === null
                 ? "N/A"
                 : "Manga"
             }}
           </span>
           <span class="year">
-            {{
-              manga.attributes.endDate
-                ? "Anno: " + getYear(manga.attributes.endDate)
-                : "In corso"
-            }}
+            {{ manga.attributes.status === "finished" ? "Finito" : "In corso" }}
           </span>
         </div>
       </div>

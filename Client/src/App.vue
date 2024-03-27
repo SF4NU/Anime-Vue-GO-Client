@@ -1,7 +1,10 @@
 <template>
   <section class="main-section">
-    <Header @toManga="toManga" />
-    <SubHeader @getUserInput="getUserInput" v-if="!toggleSubHeader" />
+    <Header @backToAnime="backToAnime" @toManga="toManga" />
+    <SubHeader
+      @getUserInput="getUserInput"
+      v-if="!toggleSubHeader"
+      :toggleMangaCards="toggleMangaCards" />
     <AnimeCard
       :data="data"
       :isLoading="isLoading"
@@ -49,6 +52,7 @@ const backToAnime = () => {
   toggleSubHeader.value = false;
   toggleAnimeCards.value = false;
   toggleAnimeFocus.value = false;
+  toggleMangaCards.value = false;
 };
 const toManga = () => {
   toggleAnimeCards.value = true;
@@ -75,11 +79,19 @@ const FetchAnime = async () => {
 };
 const FetchManga = async () => {
   try {
-    // isLoading.value = true;
-    const res = await axios.get(
-      `https://kitsu.io/api/edge/manga?filter[text]=${searchedAnime.value}&page[limit]=15`
-    );
-    dataManga.value = res.data.data;
+    isLoading.value = true;
+    if (searchedAnime.value !== "") {
+      const res = await axios.get(
+        `https://kitsu.io/api/edge/manga?filter[text]=${searchedAnime.value}&page[limit]=15`
+      );
+      dataManga.value = res.data.data;
+    } else {
+      const res = await axios.get(
+        `https://kitsu.io/api/edge/manga?page[limit]=13&page[offset]=30`
+      );
+      dataManga.value = res.data.data;
+    }
+
     console.log(dataManga.value);
   } catch (error) {
     console.error(error);
@@ -96,6 +108,7 @@ watch(
 onMounted(() => {
   FetchAnime();
   FetchManga();
+  console.log(searchedAnime.value);
 });
 </script>
 
