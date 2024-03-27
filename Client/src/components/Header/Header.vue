@@ -2,7 +2,7 @@
   <header>
     <div class="left-header">Anime</div>
     <div class="right-header">
-      <span>Manga</span>
+      <span @click="$emit('toManga')">Manga</span>
       <span>My List</span>
       <span>Register</span>
     </div>

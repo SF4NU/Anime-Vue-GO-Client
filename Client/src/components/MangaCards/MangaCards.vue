@@ -1,11 +1,14 @@
 <template>
   <div class="main-anime-card-div">
-    <div v-for="(anime, i) in props.data" :key="i" class="main-anime-display">
+    <div
+      v-for="(manga, i) in props.dataManga"
+      :key="i"
+      class="main-anime-display">
       <div v-if="!props.isLoading" class="poster-div">
         <img
           class="anime-poster"
-          :src="anime.attributes.posterImage.tiny"
-          :alt="anime.attributes.canonicalTitle + ' poster'"
+          :src="manga.attributes.posterImage.tiny"
+          :alt="manga.attributes.canonicalTitle + ' poster'"
           @click="$emit('focusOnAnime', i)" />
       </div>
       <div v-else-if="props.isLoading" class="loader"></div>
@@ -13,27 +16,27 @@
         <div>
           <span class="title" @click="$emit('focusOnAnime', i)">
             {{
-              anime.attributes.canonicalTitle.length > 20 &&
-              anime.attributes.abbreviatedTitles.length > 0
-                ? compareLengths(anime.attributes.abbreviatedTitles)
-                : anime.attributes.canonicalTitle
+              manga.attributes.canonicalTitle.length > 20 &&
+              manga.attributes.abbreviatedTitles.length > 0
+                ? compareLengths(manga.attributes.abbreviatedTitles)
+                : manga.attributes.canonicalTitle
             }}
           </span>
         </div>
         <div class="year-ep-count">
           <span class="episode-count">
             {{
-              anime.attributes.episodeCount > 1
-                ? "Episodi: " + anime.attributes.episodeCount
-                : anime.attributes.episodeCount === null
+              manga.attributes.episodeCount > 1
+                ? "Episodi: " + manga.attributes.episodeCount
+                : manga.attributes.episodeCount === null
                 ? "N/A"
-                : "Film"
+                : "Manga"
             }}
           </span>
           <span class="year">
             {{
-              anime.attributes.endDate
-                ? "Anno: " + getYear(anime.attributes.endDate)
+              manga.attributes.endDate
+                ? "Anno: " + getYear(manga.attributes.endDate)
                 : "In corso"
             }}
           </span>
@@ -45,22 +48,8 @@
           src="../../assets/star-circle-svgrepo-com.svg"
           alt="" />
         <span>
-          {{ ratingConverter(anime.attributes.averageRating) }}
+          {{ ratingConverter(manga.attributes.averageRating) }}
         </span>
-      </div>
-      <div
-        class="trailer-link-div"
-        :data-tooltip="`https://www.youtube.com/watch?v=${anime.attributes.youtubeVideoId}`">
-        <span
-          ><a
-            :href="`https://www.youtube.com/watch?v=${anime.attributes.youtubeVideoId}`"
-            target="_blank"
-            class="watch-link">
-            <img
-              class="watch-img"
-              src="../../assets/youtube-svgrepo-com.svg"
-              alt="watch-youtube-image" /> </a
-        ></span>
       </div>
     </div>
   </div>
@@ -68,7 +57,7 @@
 
 <script setup>
 import { ref, watch } from "vue";
-const props = defineProps(["data", "isLoading"]);
+const props = defineProps(["dataManga", "isLoading"]);
 import { compareLengths } from "../../utils/compareLengths";
 import { getYear } from "../../utils/getYear";
 import { ratingConverter } from "../../utils/ratingConverter";

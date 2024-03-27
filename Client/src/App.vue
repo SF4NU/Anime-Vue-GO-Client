@@ -1,6 +1,6 @@
 <template>
   <section class="main-section">
-    <Header />
+    <Header @toManga="toManga" />
     <SubHeader @getUserInput="getUserInput" v-if="!toggleSubHeader" />
     <AnimeCard
       :data="data"
@@ -12,6 +12,10 @@
       :passIndex="passIndex"
       v-else-if="toggleAnimeFocus"
       @backToAnime="backToAnime" />
+    <MangaCards
+      :dataManga="dataManga"
+      :isLoading="isLoading"
+      v-else-if="toggleMangaCards" />
   </section>
 </template>
 
@@ -21,6 +25,7 @@ import AnimeCard from "./components/AnimeCards/AnimeCards.vue";
 import Header from "./components/Header/Header.vue";
 import SubHeader from "./components/SubHeader/SubHeader.vue";
 import AnimeInfo from "./components/AnimeInfo/AnimeInfo.vue";
+import MangaCards from "./components/MangaCards/MangaCards.vue";
 import axios from "axios";
 
 const data = ref(null);
@@ -30,7 +35,9 @@ const isLoading = ref(false);
 const toggleSubHeader = ref(false);
 const toggleAnimeCards = ref(false);
 const toggleAnimeFocus = ref(false);
+const toggleMangaCards = ref(false);
 const passIndex = ref(null);
+const dataManga = ref(null);
 
 const focusOnAnime = (i) => {
   toggleSubHeader.value = true;
@@ -43,10 +50,15 @@ const backToAnime = () => {
   toggleAnimeCards.value = false;
   toggleAnimeFocus.value = false;
 };
+const toManga = () => {
+  toggleAnimeCards.value = true;
+  toggleMangaCards.value = true;
+};
 
 const getUserInput = (input) => {
   searchedAnime.value = input;
   FetchAnime();
+  FetchManga();
 };
 
 const FetchAnime = async () => {
@@ -61,6 +73,18 @@ const FetchAnime = async () => {
     console.error(error);
   }
 };
+const FetchManga = async () => {
+  try {
+    // isLoading.value = true;
+    const res = await axios.get(
+      `https://kitsu.io/api/edge/manga?filter[text]=${searchedAnime.value}&page[limit]=15`
+    );
+    dataManga.value = res.data.data;
+    console.log(dataManga.value);
+  } catch (error) {
+    console.error(error);
+  }
+};
 
 watch(
   () => data.value,
@@ -71,6 +95,7 @@ watch(
 
 onMounted(() => {
   FetchAnime();
+  FetchManga();
 });
 </script>
 
