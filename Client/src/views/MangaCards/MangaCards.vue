@@ -11,7 +11,9 @@
       <div v-else-if="isLoading" class="loader"></div>
       <div class="card-details">
         <div>
-          <router-link :to="{ name: 'MangaInfo', params: { id: i } }">
+          <router-link
+            :to="{ name: 'MangaInfo', params: { id: i } }"
+            class="router-link">
             <span class="title">
               {{
                 manga.attributes.canonicalTitle.length > 20 &&
@@ -117,6 +119,9 @@ import SubHeader from "@/components/SubHeader/SubHeader.vue";
 }
 .title:active {
   filter: brightness(1.1);
+}
+.router-link {
+  text-decoration: none;
 }
 .card-details {
   position: relative;

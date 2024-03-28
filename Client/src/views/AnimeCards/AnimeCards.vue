@@ -6,13 +6,14 @@
         <img
           class="anime-poster"
           :src="anime.attributes.posterImage.tiny"
-          :alt="anime.attributes.canonicalTitle + ' poster'"
-          @click="$emit('focusOnAnime', i)" />
+          :alt="anime.attributes.canonicalTitle + ' poster'" />
       </div>
       <div v-else-if="isLoading" class="loader"></div>
       <div class="card-details">
         <div>
-          <router-link :to="{ name: 'AnimeInfo', params: { id: i } }">
+          <router-link
+            :to="{ name: 'AnimeInfo', params: { id: i } }"
+            class="router-link">
             <span class="title">
               {{
                 anime.attributes.canonicalTitle.length > 20 &&
@@ -136,6 +137,9 @@ import SubHeader from "@/components/SubHeader/SubHeader.vue";
 }
 .title:active {
   filter: brightness(1.1);
+}
+.router-link {
+  text-decoration: none;
 }
 .card-details {
   position: relative;

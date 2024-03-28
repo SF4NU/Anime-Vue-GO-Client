@@ -32,6 +32,9 @@ header span {
   color: var(--yellow);
   text-decoration: none;
 }
+.router-link:hover {
+  text-decoration: underline;
+}
 
 .left-header {
   width: 80px;
