@@ -1,10 +1,7 @@
 <template>
   <!-- <section class="main-section">
     <Header @backToAnime="backToAnime" @toManga="toManga" />
-    <SubHeader
-      @getUserInput="getUserInput"
-      v-if="!toggleSubHeader"
-      :toggleMangaCards="toggleMangaCards" />
+    
     <AnimeCard
       :data="data"
       :isLoading="isLoading"
@@ -35,11 +32,10 @@
 import { onMounted, ref, watch, provide } from "vue";
 // import AnimeCard from "./components/AnimeCards/AnimeCards.vue";
 import Header from "./components/Header/Header.vue";
-import SubHeader from "./components/SubHeader/SubHeader.vue";
-import AnimeInfo from "./components/AnimeInfo/AnimeInfo.vue";
+// import AnimeInfo from "./components/AnimeInfo/AnimeInfo.vue";
 // import MangaCards from "./components/MangaCards/MangaCards.vue";
-import MangaInfo from "./components/MangaInfo/MangaInfo.vue";
-import Auth from "./components/Auth/Auth.vue";
+// import MangaInfo from "./components/MangaInfo/MangaInfo.vue";
+// import Auth from "./components/Auth/Auth.vue";
 import axios from "axios";
 
 const data = ref(null);
@@ -94,6 +90,7 @@ const getUserInput = (input) => {
   FetchAnime();
   FetchManga();
 };
+provide("getUserInput", getUserInput);
 
 const FetchAnime = async () => {
   try {

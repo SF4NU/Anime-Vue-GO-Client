@@ -1,72 +1,59 @@
 <template>
   <section>
     <div class="anime-main-card">
-      <div class="back-div">
+      <!-- <div class="back-div">
         <img
-          @click="$emit('backToManga')"
+          @click="$emit('backToAnime')"
           src="../../assets/back-2-svgrepo-com.svg"
           alt="back-icon" />
-      </div>
+      </div> -->
       <div class="top-row-div">
         <div class="poster-div">
-          <img
-            :src="props.dataManga[passIndexManga].attributes.posterImage.small"
-            alt="" />
+          <img :src="data[passIndex].attributes.posterImage.small" alt="" />
         </div>
         <div class="anime-info-top-right-div">
           <div class="title-div">
-            <span>{{
-              props.dataManga[passIndexManga].attributes.canonicalTitle
-            }}</span>
+            <span>{{ data[passIndex].attributes.canonicalTitle }}</span>
           </div>
           <div class="sub-titles">
             <span>Titoli alternativi: </span>
             <span>
               {{
-                props.dataManga[passIndexManga].attributes.titles.en_jp
-                  ? props.dataManga[passIndexManga].attributes.titles.en_jp
+                data[passIndex].attributes.titles.en_jp
+                  ? data[passIndex].attributes.titles.en_jp
                   : ""
               }} </span
             >&nbsp;&nbsp;&nbsp;&nbsp;
             <span>{{
-              props.dataManga[passIndexManga].attributes.titles.ja_jp
-                ? props.dataManga[passIndexManga].attributes.titles.ja_jp
+              data[passIndex].attributes.titles.ja_jp
+                ? data[passIndex].attributes.titles.ja_jp
                 : ""
             }}</span>
           </div>
           <div class="episodes-div">
-            <span
-              >Capitoli:
-              {{
-                props.dataManga[passIndexManga].attributes.chapterCount
-              }}</span
-            >
+            <span>Episodi: {{ data[passIndex].attributes.episodeCount }}</span>
             &nbsp;&nbsp;&nbsp;&nbsp;
             <span
-              >Volumi:
-              {{ props.dataManga[passIndexManga].attributes.volumeCount }}</span
+              >Durata episodio:
+              {{ data[passIndex].attributes.episodeLength }}</span
             >
           </div>
           <div class="dates-div">
-            <span>In uscita dal: </span>
-            <span>{{
-              props.dataManga[passIndexManga].attributes.startDate
-            }}</span>
+            <span>In onda dal: </span>
+            <span>{{ data[passIndex].attributes.startDate }}</span>
             &nbsp;&nbsp;&nbsp;&nbsp;
-            <span>Fino al: </span>
+            <span>In onda fino al: </span>
             <span>
               {{
-                props.dataManga[passIndexManga].attributes.endDate !== null
-                  ? props.dataManga[passIndexManga].attributes.endDate
+                data[passIndex].attributes.endDate !== null
+                  ? data[passIndex].attributes.endDate
                   : "N/A"
               }}</span
             >
           </div>
           <div class="age-rating-div">
             <span>Guida alle Classificazioni per Età: </span>
-            <span>{{
-              props.dataManga[passIndexManga].attributes.ageRating
-            }}</span>
+            <span>{{ data[passIndex].attributes.ageRatingGuide }}</span>
           </div>
           <div class="rating-div">
             <img
@@ -74,48 +61,61 @@
               src="../../assets/star-circle-svgrepo-com.svg"
               alt="anime-rating-star" />
             <span>
-              {{
-                ratingConverter(
-                  props.dataManga[passIndexManga].attributes.averageRating
-                )
-              }}
+              {{ ratingConverter(data[passIndex].attributes.averageRating) }}
             </span>
           </div>
           <div class="rating-rank">
             <span> Top: </span
             ><span>
-              {{ props.dataManga[passIndexManga].attributes.ratingRank }}
+              {{ data[passIndex].attributes.ratingRank }}
             </span>
           </div>
           <div class="show-type-div">
             <span>Tipologia: </span
             ><span>
-              {{ props.dataManga[passIndexManga].attributes.showType }}
+              {{ data[passIndex].attributes.showType }}
             </span>
           </div>
           <div class="popularity-div">
             <span> Popolarità: </span
             ><span>
-              {{ props.dataManga[passIndexManga].attributes.userCount }}
+              {{ data[passIndex].attributes.userCount }}
             </span>
             <span> utenti</span>
+          </div>
+          <div class="trailer-div" :data-tooltip1="`Youtube link`">
+            <span> Guarda trailer: </span
+            ><span
+              ><a
+                :href="`https://www.youtube.com/watch?v=${data[passIndex].attributes.youtubeVideoId}`"
+                target="_blank"
+                ><img
+                  height="35px"
+                  class="watch-img"
+                  src="../../assets/youtube-svgrepo-com.svg"
+                  alt="watch-youtube-icon" /></a
+            ></span>
           </div>
         </div>
       </div>
 
       <div class="bottom-synopsis-div">
         <span>Descrizione: </span>
-        <p>{{ props.dataManga[passIndexManga].attributes.description }}</p>
+        <p>{{ data[passIndex].attributes.description }}</p>
       </div>
     </div>
   </section>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, inject } from "vue";
+import { useRoute } from "vue-router";
 import { ratingConverter } from "@/utils/ratingConverter";
 
-const props = defineProps(["passIndexManga", "dataManga"]);
+// const props = defineProps(["passIndex", "data"]);
+const data = inject("data");
+const route = useRoute();
+const passIndex = route.params.id;
 
 const scrollToTop = () => {
   window.scrollTo({
@@ -126,7 +126,6 @@ const scrollToTop = () => {
 
 onMounted(() => {
   scrollToTop();
-  console.log("MOUNTED");
 });
 </script>
 

@@ -5,13 +5,26 @@ const routes = [
     path: "/",
     name: "Anime",
     component: () => import(".././views/AnimeCards/AnimeCards.vue"),
-    props: true,
   },
   {
     path: "/manga",
     name: "Manga",
     component: () => import(".././views/MangaCards/MangaCards.vue"),
-    props: true,
+  },
+  {
+    path: "/anime/:id",
+    name: "AnimeInfo",
+    component: () => import(".././views/AnimeInfo/AnimeInfo.vue"),
+  },
+  {
+    path: "/manga/:id",
+    name: "MangaInfo",
+    component: () => import(".././views/MangaInfo/MangaInfo.vue"),
+  },
+  {
+    path: "/register",
+    name: "Register",
+    component: () => import(".././views/Auth/Auth.vue"),
   },
 ];
 

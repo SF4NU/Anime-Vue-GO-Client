@@ -5,7 +5,7 @@
       <router-link to="/" class="router-link">Anime</router-link>
       <router-link to="/manga" class="router-link">Manga</router-link>
       <span>My List</span>
-      <span>Registrati</span>
+      <router-link to="/register" class="router-link">Registrati</router-link>
     </div>
   </header>
 </template>

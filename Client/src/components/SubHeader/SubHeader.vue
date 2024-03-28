@@ -2,14 +2,11 @@
   <header>
     <div class="search-div">
       <input
-        @keypress.enter="sendInput($emit)"
+        @keypress.enter="getUserInput(userInput)"
         v-model="userInput"
         class="search-bar"
-        type="text"
-        :placeholder="
-          props.toggleMangaCards ? 'Inserisci manga' : 'Inserisci anime'
-        " />
-      <button @click="sendInput($emit)">Cerca</button>
+        type="text" />
+      <button @click="getUserInput(userInput)">Cerca</button>
     </div>
     <div class="filter-div">
       <button class="dropdown-button">Filtri</button>
@@ -23,13 +20,13 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, inject } from "vue";
 const userInput = ref("");
-const props = defineProps(["toggleMangaCards"]);
-
-const sendInput = (emit) => {
-  emit("getUserInput", userInput.value);
-};
+// const props = defineProps(["toggleMangaCards"]);
+const getUserInput = inject("getUserInput");
+// const sendInput = (emit) => {
+//   emit("getUserInput", userInput.value);
+// };
 </script>
 
 <style scoped>

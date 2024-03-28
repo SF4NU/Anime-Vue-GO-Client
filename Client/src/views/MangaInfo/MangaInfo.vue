@@ -1,64 +1,66 @@
 <template>
   <section>
     <div class="anime-main-card">
-      <div class="back-div">
+      <!-- <div class="back-div">
         <img
-          @click="$emit('backToAnime')"
+          @click="$emit('backToManga')"
           src="../../assets/back-2-svgrepo-com.svg"
           alt="back-icon" />
-      </div>
+      </div> -->
       <div class="top-row-div">
         <div class="poster-div">
           <img
-            :src="props.data[passIndex].attributes.posterImage.small"
+            :src="dataManga[passIndexManga].attributes.posterImage.small"
             alt="" />
         </div>
         <div class="anime-info-top-right-div">
           <div class="title-div">
-            <span>{{ props.data[passIndex].attributes.canonicalTitle }}</span>
+            <span>{{
+              dataManga[passIndexManga].attributes.canonicalTitle
+            }}</span>
           </div>
           <div class="sub-titles">
             <span>Titoli alternativi: </span>
             <span>
               {{
-                props.data[passIndex].attributes.titles.en_jp
-                  ? props.data[passIndex].attributes.titles.en_jp
+                dataManga[passIndexManga].attributes.titles.en_jp
+                  ? dataManga[passIndexManga].attributes.titles.en_jp
                   : ""
               }} </span
             >&nbsp;&nbsp;&nbsp;&nbsp;
             <span>{{
-              props.data[passIndex].attributes.titles.ja_jp
-                ? props.data[passIndex].attributes.titles.ja_jp
+              dataManga[passIndexManga].attributes.titles.ja_jp
+                ? dataManga[passIndexManga].attributes.titles.ja_jp
                 : ""
             }}</span>
           </div>
           <div class="episodes-div">
             <span
-              >Episodi:
-              {{ props.data[passIndex].attributes.episodeCount }}</span
+              >Capitoli:
+              {{ dataManga[passIndexManga].attributes.chapterCount }}</span
             >
             &nbsp;&nbsp;&nbsp;&nbsp;
             <span
-              >Durata episodio:
-              {{ props.data[passIndex].attributes.episodeLength }}</span
+              >Volumi:
+              {{ dataManga[passIndexManga].attributes.volumeCount }}</span
             >
           </div>
           <div class="dates-div">
-            <span>In onda dal: </span>
-            <span>{{ props.data[passIndex].attributes.startDate }}</span>
+            <span>In uscita dal: </span>
+            <span>{{ dataManga[passIndexManga].attributes.startDate }}</span>
             &nbsp;&nbsp;&nbsp;&nbsp;
-            <span>In onda fino al: </span>
+            <span>Fino al: </span>
             <span>
               {{
-                props.data[passIndex].attributes.endDate !== null
-                  ? props.data[passIndex].attributes.endDate
+                dataManga[passIndexManga].attributes.endDate !== null
+                  ? dataManga[passIndexManga].attributes.endDate
                   : "N/A"
               }}</span
             >
           </div>
           <div class="age-rating-div">
             <span>Guida alle Classificazioni per Età: </span>
-            <span>{{ props.data[passIndex].attributes.ageRatingGuide }}</span>
+            <span>{{ dataManga[passIndexManga].attributes.ageRating }}</span>
           </div>
           <div class="rating-div">
             <img
@@ -67,58 +69,51 @@
               alt="anime-rating-star" />
             <span>
               {{
-                ratingConverter(props.data[passIndex].attributes.averageRating)
+                ratingConverter(
+                  dataManga[passIndexManga].attributes.averageRating
+                )
               }}
             </span>
           </div>
           <div class="rating-rank">
             <span> Top: </span
             ><span>
-              {{ props.data[passIndex].attributes.ratingRank }}
+              {{ dataManga[passIndexManga].attributes.ratingRank }}
             </span>
           </div>
           <div class="show-type-div">
             <span>Tipologia: </span
             ><span>
-              {{ props.data[passIndex].attributes.showType }}
+              {{ dataManga[passIndexManga].attributes.showType }}
             </span>
           </div>
           <div class="popularity-div">
             <span> Popolarità: </span
             ><span>
-              {{ props.data[passIndex].attributes.userCount }}
+              {{ dataManga[passIndexManga].attributes.userCount }}
             </span>
             <span> utenti</span>
-          </div>
-          <div class="trailer-div" :data-tooltip1="`Youtube link`">
-            <span> Guarda trailer: </span
-            ><span
-              ><a
-                :href="`https://www.youtube.com/watch?v=${props.data[passIndex].attributes.youtubeVideoId}`"
-                target="_blank"
-                ><img
-                  height="35px"
-                  class="watch-img"
-                  src="../../assets/youtube-svgrepo-com.svg"
-                  alt="watch-youtube-icon" /></a
-            ></span>
           </div>
         </div>
       </div>
 
       <div class="bottom-synopsis-div">
         <span>Descrizione: </span>
-        <p>{{ props.data[passIndex].attributes.description }}</p>
+        <p>{{ dataManga[passIndexManga].attributes.description }}</p>
       </div>
     </div>
   </section>
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, inject } from "vue";
 import { ratingConverter } from "@/utils/ratingConverter";
+import { useRoute } from "vue-router";
 
-const props = defineProps(["passIndex", "data"]);
+// const props = defineProps(["passIndexManga", "dataManga"]);
+const dataManga = inject("dataManga");
+const route = useRoute();
+const passIndexManga = route.params.id;
 
 const scrollToTop = () => {
   window.scrollTo({
@@ -129,6 +124,7 @@ const scrollToTop = () => {
 
 onMounted(() => {
   scrollToTop();
+  console.log("MOUNTED");
 });
 </script>
 

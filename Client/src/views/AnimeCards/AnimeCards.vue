@@ -1,4 +1,5 @@
 <template>
+  <SubHeader />
   <div class="main-anime-card-div">
     <div v-for="(anime, i) in data" :key="i" class="main-anime-display">
       <div v-if="!isLoading" class="poster-div">
@@ -11,14 +12,16 @@
       <div v-else-if="isLoading" class="loader"></div>
       <div class="card-details">
         <div>
-          <span class="title" @click="$emit('focusOnAnime', i)">
-            {{
-              anime.attributes.canonicalTitle.length > 20 &&
-              anime.attributes.abbreviatedTitles.length > 0
-                ? compareLengths(anime.attributes.abbreviatedTitles)
-                : anime.attributes.canonicalTitle
-            }}
-          </span>
+          <router-link :to="{ name: 'AnimeInfo', params: { id: i } }">
+            <span class="title">
+              {{
+                anime.attributes.canonicalTitle.length > 20 &&
+                anime.attributes.abbreviatedTitles.length > 0
+                  ? compareLengths(anime.attributes.abbreviatedTitles)
+                  : anime.attributes.canonicalTitle
+              }}
+            </span>
+          </router-link>
         </div>
         <div class="year-ep-count">
           <span class="episode-count">
@@ -74,6 +77,7 @@ const isLoading = inject("isLoading");
 import { compareLengths } from "../../utils/compareLengths";
 import { getYear } from "../../utils/getYear";
 import { ratingConverter } from "../../utils/ratingConverter";
+import SubHeader from "@/components/SubHeader/SubHeader.vue";
 </script>
 
 <style scoped>
