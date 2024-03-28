@@ -1,5 +1,5 @@
 <template>
-  <section class="main-section">
+  <!-- <section class="main-section">
     <Header @backToAnime="backToAnime" @toManga="toManga" />
     <SubHeader
       @getUserInput="getUserInput"
@@ -25,25 +25,30 @@
       :dataManga="dataManga"
       @backToManga="backToManga"
       v-else-if="toggleMangaFocus" />
-    <!-- <Auth /> -->
-  </section>
+    <Auth />
+  </section> -->
+  <Header />
+  <router-view />
 </template>
 
 <script setup>
-import { onMounted, ref, watch } from "vue";
-import AnimeCard from "./components/AnimeCards/AnimeCards.vue";
+import { onMounted, ref, watch, provide } from "vue";
+// import AnimeCard from "./components/AnimeCards/AnimeCards.vue";
 import Header from "./components/Header/Header.vue";
 import SubHeader from "./components/SubHeader/SubHeader.vue";
 import AnimeInfo from "./components/AnimeInfo/AnimeInfo.vue";
-import MangaCards from "./components/MangaCards/MangaCards.vue";
+// import MangaCards from "./components/MangaCards/MangaCards.vue";
 import MangaInfo from "./components/MangaInfo/MangaInfo.vue";
 import Auth from "./components/Auth/Auth.vue";
 import axios from "axios";
 
 const data = ref(null);
+provide("data", data);
+
 const searchedAnime = ref("");
 const page = ref(0);
 const isLoading = ref(false);
+provide("isLoading", isLoading);
 const toggleSubHeader = ref(false);
 const toggleAnimeCards = ref(false);
 const toggleAnimeFocus = ref(false);
@@ -52,36 +57,37 @@ const toggleMangaFocus = ref(false);
 const passIndex = ref(null);
 const passIndexManga = ref(null);
 const dataManga = ref(null);
+provide("dataManga", dataManga);
 
-const focusOnAnime = (i) => {
-  toggleSubHeader.value = true;
-  toggleAnimeCards.value = true;
-  toggleAnimeFocus.value = true;
-  toggleMangaCards.value = true;
-  passIndex.value = i;
-};
-const focusOnManga = (i) => {
-  toggleSubHeader.value = true;
-  toggleAnimeCards.value = true;
-  toggleMangaCards.value = false;
-  toggleMangaFocus.value = true;
-  passIndexManga.value = i;
-};
-const backToAnime = () => {
-  toggleSubHeader.value = false;
-  toggleAnimeCards.value = false;
-  toggleAnimeFocus.value = false;
-  toggleMangaCards.value = false;
-};
-const backToManga = () => {
-  toggleSubHeader.value = false;
-  toggleAnimeCards.value = false;
-  toggleMangaCards.value = false;
-};
-const toManga = () => {
-  toggleAnimeCards.value = true;
-  toggleMangaCards.value = true;
-};
+// const focusOnAnime = (i) => {
+//   toggleSubHeader.value = true;
+//   toggleAnimeCards.value = true;
+//   toggleAnimeFocus.value = true;
+//   toggleMangaCards.value = true;
+//   passIndex.value = i;
+// };
+// const focusOnManga = (i) => {
+//   toggleSubHeader.value = true;
+//   toggleAnimeCards.value = true;
+//   toggleMangaCards.value = false;
+//   toggleMangaFocus.value = true;
+//   passIndexManga.value = i;
+// };
+// const backToAnime = () => {
+//   toggleSubHeader.value = false;
+//   toggleAnimeCards.value = false;
+//   toggleAnimeFocus.value = false;
+//   toggleMangaCards.value = false;
+// };
+// const backToManga = () => {
+//   toggleSubHeader.value = false;
+//   toggleAnimeCards.value = false;
+//   toggleMangaCards.value = false;
+// };
+// const toManga = () => {
+//   toggleAnimeCards.value = true;
+//   toggleMangaCards.value = true;
+// };
 
 const getUserInput = (input) => {
   searchedAnime.value = input;

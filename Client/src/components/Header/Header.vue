@@ -2,8 +2,8 @@
   <header>
     <div class="left-header">Anime</div>
     <div class="right-header">
-      <span @click="$emit('backToAnime')">Anime</span>
-      <span @click="$emit('toManga')">Manga</span>
+      <router-link to="/" class="router-link">Anime</router-link>
+      <router-link to="/manga" class="router-link">Manga</router-link>
       <span>My List</span>
       <span>Registrati</span>
     </div>
@@ -27,6 +27,10 @@ header {
 header span {
   cursor: pointer;
   user-select: none;
+}
+.router-link {
+  color: var(--yellow);
+  text-decoration: none;
 }
 
 .left-header {
