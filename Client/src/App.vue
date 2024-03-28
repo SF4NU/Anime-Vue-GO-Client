@@ -18,7 +18,14 @@
     <MangaCards
       :dataManga="dataManga"
       :isLoading="isLoading"
-      v-else-if="toggleMangaCards" />
+      v-else-if="toggleMangaCards"
+      @focusOnManga="focusOnManga" />
+    <MangaInfo
+      :passIndexManga
+      :dataManga="dataManga"
+      @backToManga="backToManga"
+      v-else-if="toggleMangaFocus" />
+    <!-- <Auth /> -->
   </section>
 </template>
 
@@ -29,6 +36,8 @@ import Header from "./components/Header/Header.vue";
 import SubHeader from "./components/SubHeader/SubHeader.vue";
 import AnimeInfo from "./components/AnimeInfo/AnimeInfo.vue";
 import MangaCards from "./components/MangaCards/MangaCards.vue";
+import MangaInfo from "./components/MangaInfo/MangaInfo.vue";
+import Auth from "./components/Auth/Auth.vue";
 import axios from "axios";
 
 const data = ref(null);
@@ -39,19 +48,34 @@ const toggleSubHeader = ref(false);
 const toggleAnimeCards = ref(false);
 const toggleAnimeFocus = ref(false);
 const toggleMangaCards = ref(false);
+const toggleMangaFocus = ref(false);
 const passIndex = ref(null);
+const passIndexManga = ref(null);
 const dataManga = ref(null);
 
 const focusOnAnime = (i) => {
   toggleSubHeader.value = true;
   toggleAnimeCards.value = true;
   toggleAnimeFocus.value = true;
+  toggleMangaCards.value = true;
   passIndex.value = i;
+};
+const focusOnManga = (i) => {
+  toggleSubHeader.value = true;
+  toggleAnimeCards.value = true;
+  toggleMangaCards.value = false;
+  toggleMangaFocus.value = true;
+  passIndexManga.value = i;
 };
 const backToAnime = () => {
   toggleSubHeader.value = false;
   toggleAnimeCards.value = false;
   toggleAnimeFocus.value = false;
+  toggleMangaCards.value = false;
+};
+const backToManga = () => {
+  toggleSubHeader.value = false;
+  toggleAnimeCards.value = false;
   toggleMangaCards.value = false;
 };
 const toManga = () => {

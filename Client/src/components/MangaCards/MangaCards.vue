@@ -9,12 +9,12 @@
           class="anime-poster"
           :src="manga.attributes.posterImage.tiny"
           :alt="manga.attributes.canonicalTitle + ' poster'"
-          @click="$emit('focusOnAnime', i)" />
+          @click="$emit('focusOnManga', i)" />
       </div>
       <div v-else-if="props.isLoading" class="loader"></div>
       <div class="card-details">
         <div>
-          <span class="title" @click="$emit('focusOnAnime', i)">
+          <span class="title" @click="$emit('focusOnManga', i)">
             {{
               manga.attributes.canonicalTitle.length > 20 &&
               manga.attributes.abbreviatedTitles.length > 0

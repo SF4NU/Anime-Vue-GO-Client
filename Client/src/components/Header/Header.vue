@@ -5,7 +5,7 @@
       <span @click="$emit('backToAnime')">Anime</span>
       <span @click="$emit('toManga')">Manga</span>
       <span>My List</span>
-      <span>Register</span>
+      <span>Registrati</span>
     </div>
   </header>
 </template>
