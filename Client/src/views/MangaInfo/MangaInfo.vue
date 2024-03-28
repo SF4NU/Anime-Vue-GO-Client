@@ -81,12 +81,6 @@
               {{ dataManga[passIndexManga].attributes.ratingRank }}
             </span>
           </div>
-          <div class="show-type-div">
-            <span>Tipologia: </span
-            ><span>
-              {{ dataManga[passIndexManga].attributes.showType }}
-            </span>
-          </div>
           <div class="popularity-div">
             <span> Popolarità: </span
             ><span>

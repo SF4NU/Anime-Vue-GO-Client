@@ -1,6 +1,11 @@
 <template>
   <header>
-    <div class="left-header">Anime</div>
+    <div class="left-header">
+      <img
+        height="45px"
+        src="../../../public/animiru-svgrepo-com.svg"
+        alt="anime-logo" />
+    </div>
     <div class="right-header">
       <router-link to="/" class="router-link">Anime</router-link>
       <router-link to="/manga" class="router-link">Manga</router-link>
@@ -22,16 +27,18 @@
         :class="!toggleHeader ? 'display-icon' : ''" />
     </div>
     <div :class="!toggleHeader ? 'toggle-header' : 'phone-header'">
-      <router-link to="/" class="router-link"
-        ><span @click="handleToggleHeader()">Anime</span></router-link
-      >
-      <router-link to="/manga" class="router-link"
-        ><span @click="handleToggleHeader()">Manga</span></router-link
-      >
-      <span>My List</span>
-      <router-link to="/register" class="router-link"
-        ><span @click="handleToggleHeader()">Registrati</span></router-link
-      >
+      <div class="move-routes">
+        <router-link to="/" class="router-link"
+          ><span @click="handleToggleHeader()">Anime</span></router-link
+        >
+        <router-link to="/manga" class="router-link"
+          ><span @click="handleToggleHeader()">Manga</span></router-link
+        >
+        <span>My List</span>
+        <router-link to="/register" class="router-link"
+          ><span @click="handleToggleHeader()">Registrati</span></router-link
+        >
+      </div>
     </div>
   </header>
 </template>
@@ -80,6 +87,7 @@ header span {
 .left-header {
   width: 80px;
   text-align: center;
+  margin-left: 25px;
 }
 .right-header {
   width: 60%;
@@ -89,6 +97,7 @@ header span {
 .hamburger-div {
   margin-right: 20px;
   display: none;
+  user-select: none;
 }
 .toggle-header {
   display: none;
@@ -102,12 +111,15 @@ header span {
   top: 60px;
   left: 0;
   width: 100%;
-  height: 100vh;
+  height: 100dvh;
   background-color: var(--dark-blue);
   z-index: 1;
   line-height: 150px;
   font-size: 2.5rem;
   animation: slideDown 0.85s ease forwards;
+}
+.phone-header span {
+  user-select: none;
 }
 .hamburger-icon {
   height: 30px;
@@ -116,9 +128,15 @@ header span {
 .display-icon {
   display: none;
 }
+.move-routes {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 120px;
+}
 @keyframes slideDown {
   from {
-    top: -100vh;
+    top: -100dvh;
   }
   to {
     top: 60px;
