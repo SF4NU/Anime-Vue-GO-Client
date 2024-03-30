@@ -40,10 +40,10 @@ func main() {
 	})
 	app.Post("/register", h.CreateUser)
 	app.Post("/login", h.LoginUser)
-	app.Post("/add/anime", h.AddAnime)
+	app.Post("/add/anime/:userID", h.AddAnime)
 	app.Delete("/delete/anime/:id", h.DeleteAnime)
 	app.Put("/update/anime/:id", h.UpdateAnime)
-	app.Get("/user/:userID/anime", h.UpdateAnime)
+	app.Get("/users/:userID/anime", h.GetAnime)
 
 	port := os.Getenv("PORT")
 

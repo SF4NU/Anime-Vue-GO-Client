@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"strconv"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/sf4nu/Anime-Vue-GO-Client/models"
 )
@@ -13,7 +15,15 @@ func (h *Handlers) AddAnime(c *fiber.Ctx) error {
 		return err
 	}
 
-	if err := h.DB.Where("title = ?", anime.Title).First(&anime).Error; err == nil {
+	userID := c.Params("userID")
+
+	newUserID, err := strconv.Atoi(userID)
+	if err == nil {
+		anime.UserID = newUserID
+	}
+
+	var existingAnime models.AnimeList
+	if err := h.DB.Where("user_id = ? AND title = ?", userID, anime.Title).First(&existingAnime).Error; err == nil {
 		c.Status(fiber.StatusConflict).SendString("Anime already added")
 		return err
 	}
@@ -88,7 +98,7 @@ func (h *Handlers) UpdateAnime(c *fiber.Ctx) error {
 func (h *Handlers) GetAnime(c *fiber.Ctx) error {
 	userID := c.Params("userID")
 
-	var anime models.AnimeList
+	var anime []models.AnimeList
 
 	if err := h.DB.Where("user_id = ?", userID).Find(&anime).Error; err != nil {
 		c.Status(fiber.StatusNotFound).SendString("Anime not found")
