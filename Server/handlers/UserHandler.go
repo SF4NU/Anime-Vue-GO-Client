@@ -97,3 +97,47 @@ func (h *Handlers) DeleteUser(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusAccepted).SendString("User deleted")
 }
+
+func (h *Handlers) UpdateUser(c *fiber.Ctx) error {
+	var updatedUser models.User
+
+	if err := c.BodyParser(&updatedUser); err != nil {
+		c.Status(fiber.StatusInternalServerError).SendString("Internal server error")
+		return err
+	}
+
+	var user models.User
+	if err := h.DB.Where("username = ?", updatedUser.Username).First(&user).Error; err != nil {
+		c.Status(fiber.StatusNotFound).SendString("User not found")
+		return err
+	}
+
+	if updatedUser.Username != "" {
+		user.Username = updatedUser.Username
+	}
+
+	if updatedUser.Password != "" {
+		user.Password = updatedUser.Password
+	}
+
+	if updatedUser.Email != "" {
+		user.Email = updatedUser.Email
+	}
+
+	if err := h.DB.Save(&user).Error; err != nil {
+		c.Status(fiber.StatusInternalServerError).SendString("Internal server error")
+		return err
+	}
+
+	return c.Status(fiber.StatusAccepted).SendString("Account modified successfuly")
+}
+
+func (h *Handlers) GetUsers(c *fiber.Ctx) error {
+	var user []models.User
+
+	if err := h.DB.Find(&user).Error; err != nil {
+		c.Status(fiber.StatusNotFound).SendString("No users found")
+	}
+
+	return c.JSON(user)
+}
