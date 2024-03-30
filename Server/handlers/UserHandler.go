@@ -99,6 +99,8 @@ func (h *Handlers) DeleteUser(c *fiber.Ctx) error {
 }
 
 func (h *Handlers) UpdateUser(c *fiber.Ctx) error {
+	id := c.Params("id")
+
 	var updatedUser models.User
 
 	if err := c.BodyParser(&updatedUser); err != nil {
@@ -107,7 +109,7 @@ func (h *Handlers) UpdateUser(c *fiber.Ctx) error {
 	}
 
 	var user models.User
-	if err := h.DB.Where("username = ?", updatedUser.Username).First(&user).Error; err != nil {
+	if err := h.DB.First(&user, id).Error; err != nil {
 		c.Status(fiber.StatusNotFound).SendString("User not found")
 		return err
 	}
@@ -117,12 +119,18 @@ func (h *Handlers) UpdateUser(c *fiber.Ctx) error {
 	}
 
 	if updatedUser.Password != "" {
-		user.Password = updatedUser.Password
+		hashedPwd, err := utils.HashPassword(updatedUser.Password)
+		if err != nil {
+			c.Status(fiber.StatusBadRequest).SendString("Bad request")
+		}
+		user.Password = hashedPwd
+
+		return c.Status(fiber.StatusCreated).JSON(user)
 	}
 
-	if updatedUser.Email != "" {
-		user.Email = updatedUser.Email
-	}
+	// if updatedUser.Email != "" {
+	// 	user.Email = updatedUser.Email
+	// }
 
 	if err := h.DB.Save(&user).Error; err != nil {
 		c.Status(fiber.StatusInternalServerError).SendString("Internal server error")

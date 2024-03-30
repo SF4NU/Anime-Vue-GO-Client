@@ -43,7 +43,7 @@ func main() {
 	app.Post("/add/anime/:userID", h.AddAnime)
 	app.Delete("/delete/anime/:id", h.DeleteAnime)
 	app.Put("/update/anime/:id", h.UpdateAnime)
-	app.Put("/update/user/", h.UpdateUser)
+	app.Put("/update/user/:id", h.UpdateUser)
 	app.Get("/users/:userID/anime", h.GetAnime)
 	app.Get("/users/", h.GetUsers)
 	app.Delete("/users/delete/:id", h.DeleteUser)
