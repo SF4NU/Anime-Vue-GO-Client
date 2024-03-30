@@ -44,6 +44,7 @@ func main() {
 	app.Delete("/delete/anime/:id", h.DeleteAnime)
 	app.Put("/update/anime/:id", h.UpdateAnime)
 	app.Get("/users/:userID/anime", h.GetAnime)
+	app.Delete("/users/delete/:id", h.DeleteUser)
 
 	port := os.Getenv("PORT")
 

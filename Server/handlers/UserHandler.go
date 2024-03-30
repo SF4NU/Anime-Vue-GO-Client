@@ -67,3 +67,33 @@ func (h *Handlers) LoginUser(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusAccepted).SendString("Login successful")
 
 }
+
+func (h *Handlers) DeleteUser(c *fiber.Ctx) error {
+	id := c.Params("id")
+
+	var user models.User
+	if err := h.DB.Where("id = ?", id).First(&user).Error; err != nil {
+		c.Status(fiber.StatusNotFound).SendString("User not found")
+		return err
+	}
+
+	var animes []models.AnimeList
+
+	if err := h.DB.Where("user_ID = ?", id).Find(&animes).Error; err != nil {
+		c.Status(fiber.StatusNotFound).SendString("No anime found")
+		return err
+	}
+
+	for _, anime := range animes {
+		if err := h.DB.Delete(&anime).Error; err != nil {
+			c.Status(fiber.StatusInternalServerError).SendString("Internal server error")
+		}
+	}
+
+	if err := h.DB.Delete(&user).Error; err != nil {
+		c.Status(fiber.StatusInternalServerError).SendString("Internal server error")
+		return err
+	}
+
+	return c.Status(fiber.StatusAccepted).SendString("User deleted")
+}
