@@ -5,4 +5,5 @@ type AnimeList struct {
 	Title    string `json:"title"`
 	Finished bool   `json:"finished"`
 	Rating   int    `json:"rating"`
+	UserID   uint   `json:"user_id"`
 }

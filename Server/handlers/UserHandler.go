@@ -12,12 +12,12 @@ func (h *Handlers) CreateUser(c *fiber.Ctx) error {
 	var user models.User
 
 	if err := c.BodyParser(&user); err != nil {
-		c.Status(fiber.StatusUnauthorized).SendString("Bad request")
+		c.Status(fiber.StatusBadRequest).SendString("Bad request")
 		return err
 	}
 
 	if err := h.DB.Where("username = ?", user.Username).First(&user).Error; err == nil {
-		c.Status(fiber.StatusUnauthorized).SendString("Username already exists")
+		c.Status(fiber.StatusConflict).SendString("Username already exists")
 		return err
 	}
 
@@ -44,7 +44,7 @@ func (h *Handlers) LoginUser(c *fiber.Ctx) error {
 	var login models.Login
 
 	if err := c.BodyParser(&login); err != nil {
-		c.Status(fiber.StatusUnauthorized).SendString("Bad request")
+		c.Status(fiber.StatusBadRequest).SendString("Bad request")
 		return err
 	}
 

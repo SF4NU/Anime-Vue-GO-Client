@@ -31,7 +31,7 @@ func main() {
 
 	h := &handlers.Handlers{DB: db}
 
-	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.User{}, &models.AnimeList{})
 
 	app := fiber.New()
 
@@ -40,6 +40,10 @@ func main() {
 	})
 	app.Post("/register", h.CreateUser)
 	app.Post("/login", h.LoginUser)
+	app.Post("/add/anime", h.AddAnime)
+	app.Delete("/delete/anime/:id", h.DeleteAnime)
+	app.Put("/update/anime/:id", h.UpdateAnime)
+	app.Get("/user/:userID/anime", h.UpdateAnime)
 
 	port := os.Getenv("PORT")
 
