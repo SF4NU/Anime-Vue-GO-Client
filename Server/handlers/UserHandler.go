@@ -1,6 +1,8 @@
 package handlers
 
 import (
+	"fmt"
+
 	"github.com/gofiber/fiber/v2"
 	"github.com/sf4nu/Anime-Vue-GO-Client/models"
 	"github.com/sf4nu/Anime-Vue-GO-Client/utils"
@@ -10,16 +12,18 @@ func (h *Handlers) CreateUser(c *fiber.Ctx) error {
 	var user models.User
 
 	if err := c.BodyParser(&user); err != nil {
-		c.Status(400).SendString("Bad request")
+		c.Status(fiber.StatusUnauthorized).SendString("Bad request")
 		return err
 	}
 
 	if err := h.DB.Where("username = ?", user.Username).First(&user).Error; err == nil {
-		return c.Status(fiber.StatusUnauthorized).SendString("Username already exists")
+		c.Status(fiber.StatusUnauthorized).SendString("Username already exists")
+		return err
 	}
 
 	if err := h.DB.Where("email = ?", user.Email).First(&user).Error; err == nil {
-		return c.Status(fiber.StatusUnauthorized).SendString("Email already exists")
+		c.Status(fiber.StatusUnauthorized).SendString("Email already exists")
+		return err
 	}
 
 	hashedPassword, err := utils.HashPassword(user.Password)
@@ -34,4 +38,32 @@ func (h *Handlers) CreateUser(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(user)
+}
+
+func (h *Handlers) LoginUser(c *fiber.Ctx) error {
+	var login models.Login
+
+	if err := c.BodyParser(&login); err != nil {
+		c.Status(fiber.StatusUnauthorized).SendString("Bad request")
+		return err
+	}
+
+	var user models.User
+
+	username := login.Username
+
+	if err := h.DB.Where("username = ?", username).First(&user).Error; err != nil {
+		c.Status(fiber.StatusForbidden).SendString("Username doesn't exist")
+		fmt.Println(login.Username, user.Username)
+		return err
+	}
+
+	if err := utils.CheckPassword(login.Password, user.Password); err != nil {
+		c.Status(fiber.StatusForbidden).SendString("Password doesn't match")
+		fmt.Println(login.Password, user.Password)
+		return err
+	}
+
+	return c.Status(fiber.StatusAccepted).SendString("Login successful")
+
 }

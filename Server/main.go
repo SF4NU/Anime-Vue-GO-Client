@@ -6,7 +6,6 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/joho/godotenv"
 	"github.com/sf4nu/Anime-Vue-GO-Client/handlers"
 	"github.com/sf4nu/Anime-Vue-GO-Client/models"
 	"gorm.io/driver/postgres"
@@ -15,16 +14,12 @@ import (
 
 var db *gorm.DB
 
-// func (h *handlers.Handlers) SetupRoutes(app *fiber.App) {
-// 	api := app.Group("/api")
-// 	api.Post("/create_books", h.CreateUser)
-// }
-
 func main() {
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal(err)
-	}
+	// err := godotenv.Load(".env")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	var err error
 
 	dsn := "postgres://gnbhbxmb:QJsWh1s-Z_sbdvF5gXzpGnyCDgRrokyi@dumbo.db.elephantsql.com/gnbhbxmb"
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -40,12 +35,11 @@ func main() {
 
 	app := fiber.New()
 
-	// h.SetupRoutes(app)
-
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")
 	})
 	app.Post("/register", h.CreateUser)
+	app.Post("/login", h.LoginUser)
 
 	port := os.Getenv("PORT")
 
