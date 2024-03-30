@@ -6,6 +6,7 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/joho/godotenv"
 	"github.com/sf4nu/Anime-Vue-GO-Client/handlers"
 	"github.com/sf4nu/Anime-Vue-GO-Client/models"
 	"gorm.io/driver/postgres"
@@ -19,12 +20,19 @@ func main() {
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
-	var err error
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
 
-	dsn := "postgres://gnbhbxmb:QJsWh1s-Z_sbdvF5gXzpGnyCDgRrokyi@dumbo.db.elephantsql.com/gnbhbxmb"
+	dsn := os.Getenv("DATABASE_URL")
+	if dsn == "" {
+		log.Fatal("DATABASE_URL not found")
+	}
+
 	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
-		log.Fatal("failed to connect database")
+		log.Fatalf("failed to connect database: %v", err)
 	}
 
 	fmt.Println("Connection Opened to Database")
@@ -54,5 +62,8 @@ func main() {
 		port = "3000"
 	}
 
-	app.Listen("0.0.0.0:" + port)
+	err = app.Listen("0.0.0.0:" + port)
+	if err != nil {
+		log.Fatalf("failed to start server: %v", err)
+	}
 }
