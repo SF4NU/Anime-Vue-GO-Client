@@ -38,9 +38,7 @@
               :class="!passwordsMatch ? 'no-match' : ''"
               placeholder="••••••••" />
           </div>
-          <button type="submit" @click="checkIfPasswordsMatch">
-            Registrati
-          </button>
+          <button type="submit" @click="createUser">Registrati</button>
         </form>
       </div>
     </div>
@@ -49,6 +47,7 @@
 
 <script setup>
 import { ref } from "vue";
+import axios, { Axios } from "axios";
 const email = ref("");
 const username = ref("");
 const password = ref("");
@@ -66,8 +65,31 @@ const checkIfPasswordsMatch = () => {
     setTimeout(() => {
       passwordsMatch.value = true;
     }, 1000);
+    return false;
   } else {
     passwordsMatch.value = true;
+    return true;
+  }
+};
+
+const createUser = async () => {
+  try {
+    if (checkIfPasswordsMatch()) {
+      const res = await axios.post("http://localhost:3000/register", {
+        email: email.value,
+        username: username.value,
+        password: password.value,
+      });
+      console.log(res);
+      if (res.request.status >= 200 && res.request.status <= 209) {
+        email.value = "";
+        username.value = "";
+        password.value = "";
+        confirmPassword.value = "";
+      }
+    }
+  } catch (error) {
+    console.error(error);
   }
 };
 </script>

@@ -20,6 +20,7 @@ func main() {
 	// if err != nil {
 	// 	log.Fatal(err)
 	// }
+
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatalf("Error loading .env file")
@@ -42,6 +43,17 @@ func main() {
 	db.AutoMigrate(&models.User{}, &models.AnimeList{})
 
 	app := fiber.New()
+
+	app.Use(func(c *fiber.Ctx) error {
+		c.Set("Access-Control-Allow-Origin", "*")
+		c.Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
+		c.Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
+		if c.Method() == "OPTIONS" {
+			c.Status(fiber.StatusOK)
+			return nil
+		}
+		return c.Next()
+	})
 
 	app.Get("/", func(c *fiber.Ctx) error {
 		return c.SendString("Hello, World!")

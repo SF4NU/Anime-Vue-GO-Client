@@ -3,7 +3,7 @@
     <div class="left-header">
       <img
         height="45px"
-        src="../../../public/animiru-svgrepo-com.svg"
+        src="../../../animiru-svgrepo-com.svg"
         alt="anime-logo" />
     </div>
     <div class="right-header">
