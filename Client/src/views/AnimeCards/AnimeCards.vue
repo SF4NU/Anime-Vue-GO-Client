@@ -88,8 +88,17 @@
           }}
           alla tua lista
         </h3>
-        <h4>Numero di episodi visti</h4>
-        <div class="add-episodes-div">
+        <div class="check-if-plan-to-watch">
+          <div class="checkbox-wrapper-58">
+            <label class="switch">
+              <input type="checkbox" v-model="checkIfPlanToWatch" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <h4>Anime da vedere</h4>
+        </div>
+        <h4 v-if="!checkIfPlanToWatch">Numero di episodi visti</h4>
+        <div v-if="!checkIfPlanToWatch" class="add-episodes-div">
           <img
             height="42px"
             src="@/assets/minus.svg"
@@ -102,8 +111,8 @@
             @click="incrementEpisodeCount(anime.attributes.episodeCount)"
             alt="plus-svg" />
         </div>
-        <h4>Voto</h4>
-        <div class="add-episodes-div">
+        <h4 v-if="!checkIfPlanToWatch">Voto</h4>
+        <div v-if="!checkIfPlanToWatch" class="add-episodes-div">
           <img
             height="42px"
             src="@/assets/minus.svg"
@@ -133,6 +142,18 @@
             <span v-if="displayText">{{ lengthCounter }}/200</span>
           </div>
         </div>
+        <div class="date-div">
+          <h5>Data di inizio (opz.)</h5>
+          <input
+            @input="console.log(startingDate)"
+            type="date"
+            v-model="startingDate" />
+          <h5 v-if="animeCompleted">Data di fine (opz.)</h5>
+          <input v-if="animeCompleted" type="date" v-model="endingDate" />
+        </div>
+        <div class="submit-anime-div">
+          <button>Aggiungi</button>
+        </div>
       </div>
     </div>
   </div>
@@ -151,43 +172,55 @@ import SubHeader from "@/components/SubHeader/SubHeader.vue";
 import close from "@/assets/close.svg";
 import plus from "@/assets/plus.svg";
 
+const checkIfPlanToWatch = ref(false);
 const textAreaLength = ref("");
 const lengthCounter = ref(0);
 const updateLengthCounter = () => {
   lengthCounter.value = textAreaLength.value.length;
 };
+const animeCompleted = ref(false);
 const isAdding = ref(null);
 console.log(isAdding.value);
 const isAddingAnime = (i) => {
   if (isAdding.value === i) {
     isAdding.value = null;
-    document.getElementById("add-to-list-button").style.scale = 1;
     setEpisodeCountToZero();
     return;
   }
   isAdding.value = i;
-  document.getElementById("add-to-list-button").style.scale = 1.2;
   setEpisodeCountToZero();
 };
 
 const episodeCount = ref(0);
+const checkIfAnimeCompleted = (maxEp) => {
+  if (episodeCount.value > maxEp - 1 || episodeCount.value === "Completato") {
+    animeCompleted.value = true;
+    return;
+  }
+  animeCompleted.value = false;
+};
 const incrementEpisodeCount = (maxEp) => {
   if (episodeCount.value >= maxEp - 1 || episodeCount.value === "Completato") {
     episodeCount.value = "Completato";
+    checkIfAnimeCompleted(maxEp);
     return;
   }
+  checkIfAnimeCompleted(maxEp);
   episodeCount.value++;
 };
 const decrementEpisodeCount = (maxEp) => {
   if (episodeCount.value <= 0) {
     episodeCount.value = 0;
+    checkIfAnimeCompleted(maxEp);
     return;
   }
   if (episodeCount.value === "Completato") {
     episodeCount.value = maxEp - 1;
+    checkIfAnimeCompleted(maxEp);
     return;
   }
   episodeCount.value--;
+  checkIfAnimeCompleted(maxEp);
 };
 const setEpisodeCountToZero = () => {
   episodeCount.value = 0;
@@ -213,6 +246,13 @@ const displayText = ref(false);
 const displayTextArea = () => {
   displayText.value = !displayText.value;
 };
+
+const startingDate = ref("");
+const endingDate = ref("");
+
+// const reverseDate = (date) => {
+//   return date.split("-").reverse().join("-");
+// };
 </script>
 
 <style scoped>
@@ -222,7 +262,7 @@ const displayTextArea = () => {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(430px, 1fr));
   gap: 10px;
-  width: 80%;
+  width: 77%;
   margin-right: auto;
   margin-left: auto;
   user-select: none;
@@ -237,7 +277,8 @@ const displayTextArea = () => {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 500px;
+    min-height: 500px;
+    height: fit-content;
   }
   .anime-poster {
     height: 250px;
@@ -501,6 +542,60 @@ const displayTextArea = () => {
   font-size: 0.6rem;
   opacity: 0.8;
 }
+.date-div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+}
+.date-div input {
+  width: 150px;
+  padding-right: 10px;
+  height: 35px;
+  border-radius: 15px;
+  background-color: var(--green);
+  color: var(--dark-blue);
+  font-weight: 600;
+  text-align: center;
+  border: none;
+  margin-bottom: 10px;
+}
+.date-div input:focus {
+  outline: none;
+}
+.date-div h5 {
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+.check-if-plan-to-watch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+}
+.check-if-plan-to-watch h4 {
+  margin-left: 10px;
+}
+.submit-anime-div {
+  margin-top: 10px;
+  margin-bottom: 25px;
+}
+.submit-anime-div button {
+  background-color: var(--green);
+  color: var(--dark-blue);
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 15px;
+  cursor: pointer;
+  border: none;
+}
+.submit-anime-div button:hover {
+  filter: brightness(0.9);
+}
+.submit-anime-div button:active {
+  filter: brightness(0.8);
+}
 @keyframes l10-1 {
   0%,
   5% {
@@ -522,5 +617,83 @@ const displayTextArea = () => {
   100% {
     transform: rotate(360deg);
   }
+}
+.checkbox-wrapper-58 input[type="checkbox"] {
+  visibility: hidden;
+  display: none;
+}
+
+.checkbox-wrapper-58 *,
+.checkbox-wrapper-58 ::after,
+.checkbox-wrapper-58 ::before {
+  box-sizing: border-box;
+}
+
+.checkbox-wrapper-58 .switch {
+  --switch_width: 2em;
+  --switch_height: 1em;
+  --thumb_color: #e8e8e8;
+  --track_color: #e8e8e8;
+  --track_active_color: #888;
+  --outline_color: #ac3d01;
+  font-size: 17px;
+  position: relative;
+  display: inline-block;
+  width: var(--switch_width);
+  height: var(--switch_height);
+}
+
+.checkbox-wrapper-58 .slider {
+  box-sizing: border-box;
+  border: 2px solid var(--outline_color);
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--track_color);
+  transition: 0.15s;
+  border-radius: var(--switch_height);
+}
+
+.checkbox-wrapper-58 .slider:before {
+  box-sizing: border-box;
+  position: absolute;
+  content: "";
+  height: var(--switch_height);
+  width: var(--switch_height);
+  border: 2px solid var(--outline_color);
+  border-radius: 100%;
+  left: -2px;
+  bottom: -2px;
+  background-color: var(--thumb_color);
+  transform: translateY(-0.2em);
+  box-shadow: 0 0.2em 0 var(--outline_color);
+  transition: 0.15s;
+}
+
+.checkbox-wrapper-58 input:checked + .slider {
+  background-color: var(--track_active_color);
+}
+
+.checkbox-wrapper-58 input:focus-visible + .slider {
+  box-shadow: 0 0 0 2px var(--track_active_color);
+}
+
+.checkbox-wrapper-58 input:hover + .slider:before {
+  transform: translateY(-0.3em);
+  box-shadow: 0 0.3em 0 var(--outline_color);
+}
+
+.checkbox-wrapper-58 input:checked + .slider:before {
+  transform: translateX(calc(var(--switch_width) - var(--switch_height)))
+    translateY(-0.2em);
+}
+
+.checkbox-wrapper-58 input:hover:checked + .slider:before {
+  transform: translateX(calc(var(--switch_width) - var(--switch_height)))
+    translateY(-0.3em);
+  box-shadow: 0 0.3em 0 var(--outline_color);
 }
 </style>
