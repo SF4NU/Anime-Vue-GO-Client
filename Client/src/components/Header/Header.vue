@@ -6,7 +6,7 @@
     <div class="right-header">
       <router-link to="/" class="router-link">Anime</router-link>
       <router-link to="/manga" class="router-link">Manga</router-link>
-      <span>My List</span>
+
       <router-link v-if="!isLoggedIn" to="/register" class="router-link"
         >Registrati</router-link
       >
@@ -14,7 +14,13 @@
         >Login</router-link
       >
       <router-link
-        v-else-if="isLoggedIn"
+        v-if="isLoggedIn"
+        :to="{ name: 'MyList', params: { userId: userId } }"
+        class="router-link"
+        >MyList</router-link
+      >
+      <router-link
+        v-if="isLoggedIn"
         :to="{ name: 'Profile', params: { userId: userId } }"
         class="router-link"
         ><span>Profilo</span></router-link
@@ -42,7 +48,7 @@
         <router-link to="/manga" class="router-link"
           ><span @click="handleToggleHeader()">Manga</span></router-link
         >
-        <span>My List</span>
+
         <router-link v-if="!isLoggedIn" to="/register" class="router-link"
           ><span @click="handleToggleHeader()">Registrati</span></router-link
         >
@@ -50,7 +56,14 @@
           ><span @click="handleToggleHeader()">Login</span></router-link
         >
         <router-link
-          v-else-if="isLoggedIn"
+          v-if="isLoggedIn"
+          :to="{ name: 'MyList', params: { userId: userId } }"
+          class="router-link"
+          @click="handleToggleHeader()"
+          >MyList</router-link
+        >
+        <router-link
+          v-if="isLoggedIn"
           :to="{ name: 'Profile', params: { userId: userId } }"
           class="router-link"
           ><span @click="handleToggleHeader()">Profilo</span></router-link

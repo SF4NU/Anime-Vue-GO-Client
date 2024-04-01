@@ -2,14 +2,14 @@
   <SubHeader />
   <div class="main-anime-card-div">
     <div v-for="(anime, i) in data" :key="i" class="main-anime-display">
-      <div v-if="!isLoading" class="poster-div">
+      <div v-if="!isLoading && isAdding !== i" class="poster-div">
         <img
           class="anime-poster"
           :src="anime.attributes.posterImage.tiny"
           :alt="anime.attributes.canonicalTitle + ' poster'" />
       </div>
       <div v-else-if="isLoading" class="loader"></div>
-      <div class="card-details">
+      <div class="card-details" v-if="isAdding !== i">
         <div>
           <router-link
             :to="{ name: 'AnimeInfo', params: { id: i } }"
@@ -43,7 +43,7 @@
           </span>
         </div>
       </div>
-      <div class="rating-div">
+      <div class="rating-div" v-if="isAdding !== i">
         <img
           height="25px"
           src="../../assets/star-circle-svgrepo-com.svg"
@@ -53,6 +53,7 @@
         </span>
       </div>
       <div
+        v-if="isAdding !== i"
         class="trailer-link-div"
         :data-tooltip="`https://www.youtube.com/watch?v=${anime.attributes.youtubeVideoId}`">
         <span
@@ -66,12 +67,47 @@
               alt="watch-youtube-image" /> </a
         ></span>
       </div>
+      <div class="add-to-list" data-tooltip="Aggiungi alla tua lista">
+        <img
+          height="35px"
+          :src="isAdding !== i ? plus : close"
+          alt="add-to-list"
+          @click="isAddingAnime(i)"
+          id="add-to-list-button" />
+      </div>
+      <div class="add-to-list-expanded-div" v-if="isAdding === i">
+        <h3>
+          Aggiungi: <br />
+          {{
+            anime.attributes.canonicalTitle.length > 20 &&
+            anime.attributes.abbreviatedTitles.length > 0
+              ? compareLengths(anime.attributes.abbreviatedTitles)
+              : anime.attributes.canonicalTitle
+          }}
+          <br />
+          alla tua lista
+        </h3>
+        <h4>Numero di episodi visti</h4>
+        <div class="add-episodes-div">
+          <img
+            height="42px"
+            src="@/assets/minus.svg"
+            @click="decrement(anime.attributes.episodeCount)"
+            alt="minus-svg" />
+          <input type="text" :value="episodeCount" />
+          <img
+            height="35px"
+            src="@/assets/plus.svg"
+            @click="increment(anime.attributes.episodeCount)"
+            alt="plus-svg" />
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, watch, inject } from "vue";
+import { ref, inject } from "vue";
 // const props = defineProps(["data", "isLoading"]);
 const data = inject("data");
 const isLoading = inject("isLoading");
@@ -79,6 +115,45 @@ import { compareLengths } from "../../utils/compareLengths";
 import { getYear } from "../../utils/getYear";
 import { ratingConverter } from "../../utils/ratingConverter";
 import SubHeader from "@/components/SubHeader/SubHeader.vue";
+import close from "@/assets/close.svg";
+import plus from "@/assets/plus.svg";
+
+const isAdding = ref(null);
+console.log(isAdding.value);
+const isAddingAnime = (i) => {
+  if (isAdding.value === i) {
+    isAdding.value = null;
+    document.getElementById("add-to-list-button").style.scale = 1;
+    setEpisodeCountToZero();
+    return;
+  }
+  isAdding.value = i;
+  document.getElementById("add-to-list-button").style.scale = 1.2;
+  setEpisodeCountToZero();
+};
+
+const episodeCount = ref(0);
+const increment = (maxEp) => {
+  if (episodeCount.value >= maxEp - 1 || episodeCount.value === "Completato") {
+    episodeCount.value = "Completato";
+    return;
+  }
+  episodeCount.value++;
+};
+const decrement = (maxEp) => {
+  if (episodeCount.value <= 0) {
+    episodeCount.value = 0;
+    return;
+  }
+  if (episodeCount.value === "Completato") {
+    episodeCount.value = maxEp - 1;
+    return;
+  }
+  episodeCount.value--;
+};
+const setEpisodeCountToZero = () => {
+  episodeCount.value = 0;
+};
 </script>
 
 <style scoped>
@@ -207,12 +282,13 @@ import SubHeader from "@/components/SubHeader/SubHeader.vue";
   bottom: 6px;
   right: 120px;
 }
-.trailer-link-div::before {
+.trailer-link-div::before,
+.add-to-list::before {
   content: attr(data-tooltip);
   position: absolute;
   top: 45px;
   left: -105px;
-  z-index: 10;
+  z-index: 20;
   background-color: rgb(172, 172, 172);
   padding: 5px;
   border-radius: 10px;
@@ -221,9 +297,72 @@ import SubHeader from "@/components/SubHeader/SubHeader.vue";
   scale: 0;
   transition: opacity 0.25s ease, scale 0.15s ease;
 }
-.trailer-link-div:hover::before {
+.add-to-list::before {
+  top: 45px;
+  left: -45px;
+}
+.trailer-link-div:hover::before,
+.add-to-list:hover::before {
   opacity: 0.95;
   scale: 1;
+}
+.add-to-list {
+  position: absolute;
+  bottom: 12px;
+  right: 180px;
+  cursor: pointer;
+  filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.15));
+  z-index: 100;
+}
+.add-to-list:hover {
+  filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.15)) brightness(0.9);
+}
+.add-to-list:active {
+  scale: 1.03;
+}
+.add-to-list-expanded-div {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 15px;
+  z-index: 50;
+  color: var(--yellow);
+  font-weight: 600;
+}
+.add-to-list-expanded-div h4 {
+  margin-top: 20px;
+}
+.add-episodes-div {
+  display: flex;
+  column-gap: 20px;
+  align-items: center;
+  justify-content: center;
+}
+.add-episodes-div input {
+  width: 55px;
+  height: 35px;
+  border-radius: 15px;
+  background-color: var(--green);
+  color: var(--dark-blue);
+  font-weight: 600;
+  text-align: center;
+  border: none;
+  margin-right: 3px;
+  user-select: none;
+}
+.add-episodes-div img {
+  cursor: pointer;
+}
+.add-episodes-div img:hover {
+  filter: brightness(0.9);
+}
+.add-episodes-div img:active {
+  filter: brightness(0.8);
+}
+.add-episodes-div input:focus {
+  outline: none;
 }
 @keyframes l20-1 {
   0% {

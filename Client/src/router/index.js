@@ -36,6 +36,11 @@ const routes = [
     name: "Profile",
     component: () => import(".././views/UserProfile/Profile.vue"),
   },
+  {
+    path: "/mylist/:userId",
+    name: "MyList",
+    component: () => import(".././views/MyList/MyList.vue"),
+  },
 ];
 
 const router = createRouter({
