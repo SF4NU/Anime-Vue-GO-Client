@@ -19,7 +19,7 @@
                 anime.attributes.canonicalTitle.length > 20 &&
                 anime.attributes.abbreviatedTitles.length > 0
                   ? compareLengths(anime.attributes.abbreviatedTitles)
-                  : anime.attributes.canonicalTitle
+                  : cutString(anime.attributes.canonicalTitle)
               }}
             </span>
           </router-link>
@@ -67,7 +67,9 @@
               alt="watch-youtube-image" /> </a
         ></span>
       </div>
-      <div class="add-to-list" data-tooltip="Aggiungi alla tua lista">
+      <div
+        :class="isAdding !== i ? 'add-to-list' : 'add-to-list-close'"
+        data-tooltip="Aggiungi alla tua lista">
         <img
           height="35px"
           :src="isAdding !== i ? plus : close"
@@ -77,14 +79,13 @@
       </div>
       <div class="add-to-list-expanded-div" v-if="isAdding === i">
         <h3>
-          Aggiungi: <br />
+          Aggiungi: &nbsp;
           {{
             anime.attributes.canonicalTitle.length > 20 &&
             anime.attributes.abbreviatedTitles.length > 0
               ? compareLengths(anime.attributes.abbreviatedTitles)
-              : anime.attributes.canonicalTitle
+              : cutString(anime.attributes.canonicalTitle)
           }}
-          <br />
           alla tua lista
         </h3>
         <h4>Numero di episodi visti</h4>
@@ -92,14 +93,45 @@
           <img
             height="42px"
             src="@/assets/minus.svg"
-            @click="decrement(anime.attributes.episodeCount)"
+            @click="decrementEpisodeCount(anime.attributes.episodeCount)"
             alt="minus-svg" />
-          <input type="text" :value="episodeCount" />
+          <span>{{ episodeCount }}</span>
           <img
             height="35px"
             src="@/assets/plus.svg"
-            @click="increment(anime.attributes.episodeCount)"
+            @click="incrementEpisodeCount(anime.attributes.episodeCount)"
             alt="plus-svg" />
+        </div>
+        <h4>Voto</h4>
+        <div class="add-episodes-div">
+          <img
+            height="42px"
+            src="@/assets/minus.svg"
+            @click="decrementUserRating"
+            alt="minus-svg" />
+          <span>{{ userRating }}</span>
+          <img
+            height="35px"
+            src="@/assets/plus.svg"
+            @click="incrementUserRating"
+            alt="plus-svg" />
+        </div>
+        <div class="comment-div">
+          <button @click="displayTextArea">Nota</button>
+          <div class="text-area-div">
+            <textarea
+              @input="updateLengthCounter"
+              v-if="displayText"
+              maxlength="200"
+              v-model="textAreaLength"
+              name="comment"
+              id="comment"
+              cols="20"
+              rows="5"
+              placeholder="Questo anime mi è piaciuto perché...">
+            </textarea>
+            <span v-if="displayText">{{ lengthCounter }}/200</span>
+          </div>
         </div>
       </div>
     </div>
@@ -114,10 +146,16 @@ const isLoading = inject("isLoading");
 import { compareLengths } from "../../utils/compareLengths";
 import { getYear } from "../../utils/getYear";
 import { ratingConverter } from "../../utils/ratingConverter";
+import { cutString } from "../../utils/cutString";
 import SubHeader from "@/components/SubHeader/SubHeader.vue";
 import close from "@/assets/close.svg";
 import plus from "@/assets/plus.svg";
 
+const textAreaLength = ref("");
+const lengthCounter = ref(0);
+const updateLengthCounter = () => {
+  lengthCounter.value = textAreaLength.value.length;
+};
 const isAdding = ref(null);
 console.log(isAdding.value);
 const isAddingAnime = (i) => {
@@ -133,14 +171,14 @@ const isAddingAnime = (i) => {
 };
 
 const episodeCount = ref(0);
-const increment = (maxEp) => {
+const incrementEpisodeCount = (maxEp) => {
   if (episodeCount.value >= maxEp - 1 || episodeCount.value === "Completato") {
     episodeCount.value = "Completato";
     return;
   }
   episodeCount.value++;
 };
-const decrement = (maxEp) => {
+const decrementEpisodeCount = (maxEp) => {
   if (episodeCount.value <= 0) {
     episodeCount.value = 0;
     return;
@@ -153,6 +191,27 @@ const decrement = (maxEp) => {
 };
 const setEpisodeCountToZero = () => {
   episodeCount.value = 0;
+};
+
+const userRating = ref(1);
+
+const incrementUserRating = () => {
+  if (userRating.value >= 10) {
+    userRating.value = 10;
+    return;
+  }
+  userRating.value += 0.5;
+};
+const decrementUserRating = () => {
+  if (userRating.value <= 1) {
+    userRating.value = 1;
+    return;
+  }
+  userRating.value -= 0.5;
+};
+const displayText = ref(false);
+const displayTextArea = () => {
+  displayText.value = !displayText.value;
 };
 </script>
 
@@ -240,13 +299,6 @@ const setEpisodeCountToZero = () => {
   align-items: center;
   justify-content: center;
 }
-.loader {
-  width: 50px;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  border: 8px solid #514b82;
-  animation: l20-1 0.8s infinite linear alternate, l20-2 1.6s infinite linear;
-}
 .rating-div {
   position: absolute;
   bottom: 15px;
@@ -314,15 +366,25 @@ const setEpisodeCountToZero = () => {
   filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.15));
   z-index: 100;
 }
-.add-to-list:hover {
+.add-to-list-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  cursor: pointer;
+  filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.15));
+  z-index: 100;
+}
+.add-to-list:hover,
+.add-to-list-close:hover {
   filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.15)) brightness(0.9);
 }
-.add-to-list:active {
+.add-to-list:active,
+.add-to-list-close:active {
   scale: 1.03;
 }
 .add-to-list-expanded-div {
-  width: 100%;
-  height: 100%;
+  width: 85%;
+  height: 90%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -330,9 +392,13 @@ const setEpisodeCountToZero = () => {
   z-index: 50;
   color: var(--yellow);
   font-weight: 600;
+  line-height: 25px;
+  margin-right: auto;
+  margin-left: auto;
 }
 .add-to-list-expanded-div h4 {
-  margin-top: 20px;
+  margin-top: 10px;
+  margin-bottom: 15px;
 }
 .add-episodes-div {
   display: flex;
@@ -364,89 +430,97 @@ const setEpisodeCountToZero = () => {
 .add-episodes-div input:focus {
   outline: none;
 }
-@keyframes l20-1 {
-  0% {
-    clip-path: polygon(50% 50%, 0 0, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%);
-  }
-  12.5% {
-    clip-path: polygon(
-      50% 50%,
-      0 0,
-      50% 0%,
-      100% 0%,
-      100% 0%,
-      100% 0%,
-      100% 0%
-    );
-  }
-  25% {
-    clip-path: polygon(
-      50% 50%,
-      0 0,
-      50% 0%,
-      100% 0%,
-      100% 100%,
-      100% 100%,
-      100% 100%
-    );
-  }
-  50% {
-    clip-path: polygon(
-      50% 50%,
-      0 0,
-      50% 0%,
-      100% 0%,
-      100% 100%,
-      50% 100%,
-      0% 100%
-    );
-  }
-  62.5% {
-    clip-path: polygon(
-      50% 50%,
-      100% 0,
-      100% 0%,
-      100% 0%,
-      100% 100%,
-      50% 100%,
-      0% 100%
-    );
-  }
-  75% {
-    clip-path: polygon(
-      50% 50%,
-      100% 100%,
-      100% 100%,
-      100% 100%,
-      100% 100%,
-      50% 100%,
-      0% 100%
-    );
-  }
-  100% {
-    clip-path: polygon(
-      50% 50%,
-      50% 100%,
-      50% 100%,
-      50% 100%,
-      50% 100%,
-      50% 100%,
-      0% 100%
-    );
-  }
+.comment-div {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 }
-@keyframes l20-2 {
-  0% {
-    transform: scaleY(1) rotate(0deg);
+.comment-div button {
+  background-color: var(--green);
+  color: var(--dark-blue);
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 15px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  border: none;
+}
+.comment-div button:hover {
+  filter: brightness(0.9);
+}
+.comment-div button:active {
+  filter: brightness(0.8);
+}
+.comment-div textarea {
+  width: 80%;
+  height: 100px;
+  border-radius: 15px;
+  background-color: var(--green);
+  color: var(--dark-blue);
+  font-weight: 600;
+  padding: 10px;
+  border: none;
+  resize: none;
+}
+.comment-div textarea:focus {
+  outline: none;
+}
+.loader {
+  width: 32px;
+  height: 16px;
+  display: flex;
+  margin-top: 50px;
+}
+.loader:before,
+.loader:after {
+  content: "";
+  flex: 1;
+  background: #3fb8af;
+  transform-origin: top right;
+  animation: l10-1 1s infinite;
+}
+.loader:after {
+  background: #ff3d7f;
+  transform-origin: top left;
+  animation-delay: 0.15s;
+}
+.text-area-div {
+  display: flex;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+}
+.text-area-div span {
+  position: absolute;
+  bottom: 0;
+  right: 30px;
+  color: var(--yellow);
+  font-weight: 400;
+  font-size: 0.6rem;
+  opacity: 0.8;
+}
+@keyframes l10-1 {
+  0%,
+  5% {
+    transform: rotate(0);
   }
-  49.99% {
-    transform: scaleY(1) rotate(135deg);
+  20%,
+  30% {
+    transform: rotate(90deg);
   }
-  50% {
-    transform: scaleY(-1) rotate(0deg);
+  45%,
+  55% {
+    transform: rotate(180deg);
   }
+  70%,
+  80% {
+    transform: rotate(270deg);
+  }
+  95%,
   100% {
-    transform: scaleY(-1) rotate(-135deg);
+    transform: rotate(360deg);
   }
 }
 </style>

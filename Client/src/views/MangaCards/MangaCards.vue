@@ -147,13 +147,6 @@ import SubHeader from "@/components/SubHeader/SubHeader.vue";
   align-items: center;
   justify-content: center;
 }
-.loader {
-  width: 50px;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  border: 8px solid #514b82;
-  animation: l20-1 0.8s infinite linear alternate, l20-2 1.6s infinite linear;
-}
 .rating-div {
   position: absolute;
   bottom: 15px;
@@ -207,89 +200,45 @@ import SubHeader from "@/components/SubHeader/SubHeader.vue";
   opacity: 0.95;
   scale: 1;
 }
-@keyframes l20-1 {
-  0% {
-    clip-path: polygon(50% 50%, 0 0, 50% 0%, 50% 0%, 50% 0%, 50% 0%, 50% 0%);
-  }
-  12.5% {
-    clip-path: polygon(
-      50% 50%,
-      0 0,
-      50% 0%,
-      100% 0%,
-      100% 0%,
-      100% 0%,
-      100% 0%
-    );
-  }
-  25% {
-    clip-path: polygon(
-      50% 50%,
-      0 0,
-      50% 0%,
-      100% 0%,
-      100% 100%,
-      100% 100%,
-      100% 100%
-    );
-  }
-  50% {
-    clip-path: polygon(
-      50% 50%,
-      0 0,
-      50% 0%,
-      100% 0%,
-      100% 100%,
-      50% 100%,
-      0% 100%
-    );
-  }
-  62.5% {
-    clip-path: polygon(
-      50% 50%,
-      100% 0,
-      100% 0%,
-      100% 0%,
-      100% 100%,
-      50% 100%,
-      0% 100%
-    );
-  }
-  75% {
-    clip-path: polygon(
-      50% 50%,
-      100% 100%,
-      100% 100%,
-      100% 100%,
-      100% 100%,
-      50% 100%,
-      0% 100%
-    );
-  }
-  100% {
-    clip-path: polygon(
-      50% 50%,
-      50% 100%,
-      50% 100%,
-      50% 100%,
-      50% 100%,
-      50% 100%,
-      0% 100%
-    );
-  }
+.loader {
+  width: 32px;
+  height: 16px;
+  display: flex;
+  margin-top: 50px;
 }
-@keyframes l20-2 {
-  0% {
-    transform: scaleY(1) rotate(0deg);
+.loader:before,
+.loader:after {
+  content: "";
+  flex: 1;
+  background: #3fb8af;
+  transform-origin: top right;
+  animation: l10-1 1s infinite;
+}
+.loader:after {
+  background: #ff3d7f;
+  transform-origin: top left;
+  animation-delay: 0.15s;
+}
+@keyframes l10-1 {
+  0%,
+  5% {
+    transform: rotate(0);
   }
-  49.99% {
-    transform: scaleY(1) rotate(135deg);
+  20%,
+  30% {
+    transform: rotate(90deg);
   }
-  50% {
-    transform: scaleY(-1) rotate(0deg);
+  45%,
+  55% {
+    transform: rotate(180deg);
   }
+  70%,
+  80% {
+    transform: rotate(270deg);
+  }
+  95%,
   100% {
-    transform: scaleY(-1) rotate(-135deg);
+    transform: rotate(360deg);
   }
 }
 </style>
