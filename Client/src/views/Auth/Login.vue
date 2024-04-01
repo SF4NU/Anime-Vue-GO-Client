@@ -2,16 +2,8 @@
   <section>
     <div class="main-auth-div">
       <div class="registration-div">
-        <h1>Iscrizione</h1>
+        <h1>Login</h1>
         <form @submit.prevent>
-          <div>
-            <label for="email">Email</label>
-            <input
-              v-model="email"
-              type="email"
-              id="email"
-              placeholder="esempio@yourmail.com" />
-          </div>
           <div>
             <label for="username">Username</label>
             <input
@@ -28,16 +20,8 @@
               id="password"
               placeholder="••••••••" />
           </div>
-          <div>
-            <label for="confirmPassword">Conferma Password</label>
-            <input
-              v-model="confirmPassword"
-              type="password"
-              id="confirmPassword"
-              :class="!passwordsMatch ? 'no-match' : ''"
-              placeholder="••••••••" />
-          </div>
-          <button type="submit" @click="createUser">Registrati</button>
+
+          <button type="submit" @click="loginUser">Entra</button>
         </form>
       </div>
     </div>
@@ -46,46 +30,25 @@
 
 <script setup>
 import { ref, provide } from "vue";
-import axios, { Axios } from "axios";
-const email = ref("");
+import axios from "axios";
+
 const username = ref("");
 const password = ref("");
-const confirmPassword = ref("");
-const passwordsMatch = ref(true);
+const userId = ref(null);
 
-const checkIfPasswordsMatch = () => {
-  if (
-    password.value !== confirmPassword.value &&
-    confirmPassword.value !== "" &&
-    password.value !== ""
-  ) {
-    passwordsMatch.value = false;
-    confirmPassword.value = "";
-    setTimeout(() => {
-      passwordsMatch.value = true;
-    }, 1000);
-    return false;
-  } else {
-    passwordsMatch.value = true;
-    return true;
-  }
-};
-
-const createUser = async () => {
+const loginUser = async () => {
   try {
-    if (checkIfPasswordsMatch()) {
-      const res = await axios.post("http://localhost:3000/register", {
-        email: email.value,
-        username: username.value,
-        password: password.value,
-      });
-      console.log(res);
-      if (res.request.status >= 200 && res.request.status <= 209) {
-        email.value = "";
-        username.value = "";
-        password.value = "";
-        confirmPassword.value = "";
-      }
+    const res = await axios.post("http://localhost:3000/login", {
+      username: username.value,
+      password: password.value,
+    });
+
+    if (res.request.status >= 200 && res.request.status <= 209 && res) {
+      console.log(res.data);
+      username.value = "";
+      password.value = "";
+      userId.value = res.data.ID;
+      provide(userId.value);
     }
   } catch (error) {
     console.error(error);
@@ -98,6 +61,7 @@ const createUser = async () => {
   display: flex;
   justify-content: center;
   align-items: center;
+  margin-top: 100px;
 }
 .registration-div {
   margin-top: 100px;
@@ -112,6 +76,7 @@ const createUser = async () => {
   font-size: 1.5rem;
   text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.5);
   box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.25);
+  width: clamp(280px, 70%, 340px);
 }
 h1 {
   margin: 0;

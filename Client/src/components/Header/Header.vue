@@ -1,16 +1,14 @@
 <template>
   <header>
     <div class="left-header">
-      <img
-        height="45px"
-        src="../../../animiru-svgrepo-com.svg"
-        alt="anime-logo" />
+      <img height="45px" src="/animiru-svgrepo-com.svg" alt="anime-logo" />
     </div>
     <div class="right-header">
       <router-link to="/" class="router-link">Anime</router-link>
       <router-link to="/manga" class="router-link">Manga</router-link>
       <span>My List</span>
       <router-link to="/register" class="router-link">Registrati</router-link>
+      <router-link to="/login" class="router-link">Login</router-link>
     </div>
     <div class="hamburger-div">
       <img
@@ -37,6 +35,9 @@
         <span>My List</span>
         <router-link to="/register" class="router-link"
           ><span @click="handleToggleHeader()">Registrati</span></router-link
+        >
+        <router-link to="/login" class="router-link"
+          ><span @click="handleToggleHeader()">Login</span></router-link
         >
       </div>
     </div>
