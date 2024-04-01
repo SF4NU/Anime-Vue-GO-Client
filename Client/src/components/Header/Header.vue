@@ -7,8 +7,18 @@
       <router-link to="/" class="router-link">Anime</router-link>
       <router-link to="/manga" class="router-link">Manga</router-link>
       <span>My List</span>
-      <router-link to="/register" class="router-link">Registrati</router-link>
-      <router-link to="/login" class="router-link">Login</router-link>
+      <router-link v-if="!isLoggedIn" to="/register" class="router-link"
+        >Registrati</router-link
+      >
+      <router-link v-if="!isLoggedIn" to="/login" class="router-link"
+        >Login</router-link
+      >
+      <router-link
+        v-else-if="isLoggedIn"
+        :to="{ name: 'Profile', params: { userId: userId } }"
+        class="router-link"
+        ><span>Profilo</span></router-link
+      >
     </div>
     <div class="hamburger-div">
       <img
@@ -33,11 +43,17 @@
           ><span @click="handleToggleHeader()">Manga</span></router-link
         >
         <span>My List</span>
-        <router-link to="/register" class="router-link"
+        <router-link v-if="!isLoggedIn" to="/register" class="router-link"
           ><span @click="handleToggleHeader()">Registrati</span></router-link
         >
-        <router-link to="/login" class="router-link"
+        <router-link v-if="!isLoggedIn" to="/login" class="router-link"
           ><span @click="handleToggleHeader()">Login</span></router-link
+        >
+        <router-link
+          v-else-if="isLoggedIn"
+          :to="{ name: 'Profile', params: { userId: userId } }"
+          class="router-link"
+          ><span @click="handleToggleHeader()">Profilo</span></router-link
         >
       </div>
     </div>
@@ -45,13 +61,14 @@
 </template>
 
 <script setup>
-import { ref, onUpdated } from "vue";
-
+import { ref, onUpdated, inject, nextTick } from "vue";
+const isLoggedIn = inject("isLoggedIn");
 const toggleHeader = ref(false);
-
+const userId = inject("userId");
 const handleToggleHeader = () => {
   toggleHeader.value = !toggleHeader.value;
 };
+
 onUpdated(() => {
   if (toggleHeader.value) {
     document.body.style.overflow = "hidden";

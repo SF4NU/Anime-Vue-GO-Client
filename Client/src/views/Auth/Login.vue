@@ -29,13 +29,15 @@
 </template>
 
 <script setup>
-import { ref, provide } from "vue";
+import { ref, provide, inject } from "vue";
 import axios from "axios";
+import { routeLocationKey, useRoute } from "vue-router";
+import router from "@/router";
 
 const username = ref("");
 const password = ref("");
 const userId = ref(null);
-
+const getUserId = inject("getUserId");
 const loginUser = async () => {
   try {
     const res = await axios.post("http://localhost:3000/login", {
@@ -43,12 +45,12 @@ const loginUser = async () => {
       password: password.value,
     });
 
-    if (res.request.status >= 200 && res.request.status <= 209 && res) {
-      console.log(res.data);
+    if (res.status >= 200 && res.status <= 209) {
       username.value = "";
       password.value = "";
-      userId.value = res.data.ID;
-      provide(userId.value);
+      userId.value = res.data;
+      getUserId(userId.value);
+      await router.push(`/profile/${userId.value}`);
     }
   } catch (error) {
     console.error(error);

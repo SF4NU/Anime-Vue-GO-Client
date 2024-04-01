@@ -64,7 +64,7 @@ func (h *Handlers) LoginUser(c *fiber.Ctx) error {
 		return err
 	}
 
-	return c.Status(fiber.StatusAccepted).SendString("Login successful")
+	return c.Status(fiber.StatusAccepted).JSON(user.ID)
 
 }
 
@@ -148,4 +148,21 @@ func (h *Handlers) GetUsers(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(user)
+}
+
+func (h *Handlers) GetUserProfile(c *fiber.Ctx) error {
+	id := c.Params("id")
+
+	var user models.User
+
+	if err := h.DB.First(&user, id).Error; err != nil {
+		c.Status(fiber.StatusNotFound).SendString("User Not found")
+		return err
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"ID":       user.ID,
+		"Email":    user.Email,
+		"Username": user.Username,
+	})
 }
