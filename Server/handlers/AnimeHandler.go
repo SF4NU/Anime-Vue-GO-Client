@@ -28,8 +28,8 @@ func (h *Handlers) AddAnime(c *fiber.Ctx) error {
 		return err
 	}
 
-	if anime.Rating > 10 || anime.Rating <= 0 {
-		return c.Status(fiber.StatusBadRequest).SendString("Rating must be between 1 and 10")
+	if anime.Rating > 10 || anime.Rating < 0 {
+		return c.Status(fiber.StatusBadRequest).SendString("Rating must be between 0 and 10")
 	}
 
 	if err := h.DB.Create(&anime).Error; err != nil {

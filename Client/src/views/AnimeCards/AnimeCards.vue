@@ -192,6 +192,7 @@ import close from "@/assets/close.svg";
 import plus from "@/assets/plus.svg";
 import axios from "axios";
 
+const isLoggedIn = inject("isLoggedIn");
 const checkIfPlanToWatch = ref(false);
 const textAreaLength = ref("");
 const lengthCounter = ref(0);
@@ -207,7 +208,6 @@ const isAddingAnime = (i) => {
     return;
   }
   isAdding.value = i;
-  console.log(isAdding.value);
   setCountersToZero();
 };
 
@@ -288,25 +288,54 @@ const reverseDate = (date) => {
 const userId = inject("userId");
 const submitAnime = async () => {
   try {
-    const res = await axios.post(`http://localhost:3000/add/anime/${userId}`, {
-      title: data.value[isAdding.value].attributes.canonicalTitle,
-      finished: animeCompleted.value,
-      episodes:
-        episodeCount.value === "Completato"
-          ? data.value[isAdding.value].attributes.episodeCount
-          : episodeCount.value,
-      rating: userRating.value,
-      comment: textAreaLength.value === "" ? "N/A" : textAreaLength.value,
-      startingDate: reverseDate(startingDate.value),
-      endingDate: reverseDate(endingDate.value),
-    });
-    console.log(res);
+    console.log(userId);
+    if (!isLoggedIn.value) {
+      console.log("You need to be logged in to add anime to your list");
+      return;
+    }
+    if (checkIfPlanToWatch.value) {
+      const res = await axios.post(
+        `http://localhost:3000/add/anime/${userId.value}`,
+        {
+          title: data.value[isAdding.value].attributes.canonicalTitle,
+          finished: false,
+          episodes: 0,
+          rating: 0,
+          comment: "N/A",
+          starting_date: reverseDate(startingDate.value),
+          ending_date: "N/A",
+          plan_to_watch: true,
+        }
+      );
+      console.log(res);
+      isAdding.value = null;
+      return;
+    } else {
+      const res = await axios.post(
+        `http://localhost:3000/add/anime/${userId.value}`,
+        {
+          title: data.value[isAdding.value].attributes.canonicalTitle,
+          finished: animeCompleted.value,
+          episodes:
+            episodeCount.value === "Completato"
+              ? data.value[isAdding.value].attributes.episodeCount
+              : episodeCount.value,
+          rating: userRating.value,
+          comment: textAreaLength.value === "" ? "N/A" : textAreaLength.value,
+          starting_date: reverseDate(startingDate.value),
+          ending_date: reverseDate(endingDate.value),
+          plan_to_watch: false,
+        }
+      );
+      console.log(res);
+      isAdding.value = null;
+    }
   } catch (error) {
     console.error(error);
   }
 };
 const doThis = () => {
-  console.log(reverseDate(startingDate.value));
+  console.log(checkIfPlanToWatch.value);
 };
 </script>
 
