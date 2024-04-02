@@ -97,8 +97,21 @@
           </div>
           <h4>Anime da vedere</h4>
         </div>
-        <h4 v-if="!checkIfPlanToWatch">Numero di episodi visti</h4>
-        <div v-if="!checkIfPlanToWatch" class="add-episodes-div">
+        <h4
+          v-if="
+            !checkIfPlanToWatch &&
+            anime.attributes.episodeCount !== null &&
+            anime.attributes.episodeCount !== 1
+          ">
+          Numero di episodi visti
+        </h4>
+        <div
+          v-if="
+            !checkIfPlanToWatch &&
+            anime.attributes.episodeCount !== null &&
+            anime.attributes.episodeCount !== 1
+          "
+          class="add-episodes-div">
           <img
             height="42px"
             src="@/assets/minus.svg"
@@ -137,7 +150,7 @@
               id="comment"
               cols="20"
               rows="5"
-              placeholder="Questo anime mi è piaciuto perché...">
+              placeholder="Questo anime mi è piaciuto/non mi è piaciuto perché...">
             </textarea>
             <span v-if="displayText">{{ lengthCounter }}/200</span>
           </div>
@@ -147,9 +160,16 @@
           <input
             @input="console.log(startingDate)"
             type="date"
-            v-model="startingDate" />
+            v-model="startingDate"
+            min="2000-01-01"
+            max="2025-12-31" />
           <h5 v-if="animeCompleted">Data di fine (opz.)</h5>
-          <input v-if="animeCompleted" type="date" v-model="endingDate" />
+          <input
+            v-if="animeCompleted"
+            type="date"
+            v-model="endingDate"
+            min="2000-01-01"
+            max="2025-12-31" />
         </div>
         <div class="submit-anime-div">
           <button>Aggiungi</button>
@@ -184,11 +204,23 @@ console.log(isAdding.value);
 const isAddingAnime = (i) => {
   if (isAdding.value === i) {
     isAdding.value = null;
-    setEpisodeCountToZero();
+    setCountersToZero();
     return;
   }
   isAdding.value = i;
-  setEpisodeCountToZero();
+  setCountersToZero();
+};
+
+const setCountersToZero = () => {
+  episodeCount.value = 0;
+  userRating.value = 1;
+  textAreaLength.value = "";
+  lengthCounter.value = 0;
+  displayText.value = false;
+  startingDate.value = "";
+  endingDate.value = "";
+  checkIfPlanToWatch.value = false;
+  animeCompleted.value = false;
 };
 
 const episodeCount = ref(0);
@@ -222,10 +254,6 @@ const decrementEpisodeCount = (maxEp) => {
   episodeCount.value--;
   checkIfAnimeCompleted(maxEp);
 };
-const setEpisodeCountToZero = () => {
-  episodeCount.value = 0;
-};
-
 const userRating = ref(1);
 
 const incrementUserRating = () => {
@@ -430,7 +458,7 @@ const endingDate = ref("");
   flex-direction: column;
   align-items: center;
   border-radius: 15px;
-  z-index: 50;
+  z-index: 20;
   color: var(--yellow);
   font-weight: 600;
   line-height: 25px;

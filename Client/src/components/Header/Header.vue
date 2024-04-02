@@ -144,7 +144,7 @@ header span {
   width: 100%;
   height: 100dvh;
   background-color: var(--dark-blue);
-  z-index: 1;
+  z-index: 999;
   line-height: 150px;
   font-size: 2.5rem;
   animation: slideDown 0.85s ease forwards;
