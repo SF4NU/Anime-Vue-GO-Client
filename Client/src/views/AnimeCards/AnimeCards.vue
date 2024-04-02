@@ -158,7 +158,6 @@
         <div class="date-div">
           <h5>Data di inizio (opz.)</h5>
           <input
-            @input="console.log(startingDate)"
             type="date"
             v-model="startingDate"
             min="2000-01-01"
@@ -172,7 +171,7 @@
             max="2025-12-31" />
         </div>
         <div class="submit-anime-div">
-          <button>Aggiungi</button>
+          <button @click="submitAnime">Aggiungi</button>
         </div>
       </div>
     </div>
@@ -191,6 +190,7 @@ import { cutString } from "../../utils/cutString";
 import SubHeader from "@/components/SubHeader/SubHeader.vue";
 import close from "@/assets/close.svg";
 import plus from "@/assets/plus.svg";
+import axios from "axios";
 
 const checkIfPlanToWatch = ref(false);
 const textAreaLength = ref("");
@@ -200,7 +200,6 @@ const updateLengthCounter = () => {
 };
 const animeCompleted = ref(false);
 const isAdding = ref(null);
-console.log(isAdding.value);
 const isAddingAnime = (i) => {
   if (isAdding.value === i) {
     isAdding.value = null;
@@ -208,6 +207,7 @@ const isAddingAnime = (i) => {
     return;
   }
   isAdding.value = i;
+  console.log(isAdding.value);
   setCountersToZero();
 };
 
@@ -227,6 +227,9 @@ const episodeCount = ref(0);
 const checkIfAnimeCompleted = (maxEp) => {
   if (episodeCount.value > maxEp - 1 || episodeCount.value === "Completato") {
     animeCompleted.value = true;
+    if (data.value[isAdding.value].attributes.episodeCount === 1) {
+      episodeCount.value = 1;
+    }
     return;
   }
   animeCompleted.value = false;
@@ -278,9 +281,33 @@ const displayTextArea = () => {
 const startingDate = ref("");
 const endingDate = ref("");
 
-// const reverseDate = (date) => {
-//   return date.split("-").reverse().join("-");
-// };
+const reverseDate = (date) => {
+  return date.split("-").reverse().join("-");
+};
+
+const userId = inject("userId");
+const submitAnime = async () => {
+  try {
+    const res = await axios.post(`http://localhost:3000/add/anime/${userId}`, {
+      title: data.value[isAdding.value].attributes.canonicalTitle,
+      finished: animeCompleted.value,
+      episodes:
+        episodeCount.value === "Completato"
+          ? data.value[isAdding.value].attributes.episodeCount
+          : episodeCount.value,
+      rating: userRating.value,
+      comment: textAreaLength.value === "" ? "N/A" : textAreaLength.value,
+      startingDate: reverseDate(startingDate.value),
+      endingDate: reverseDate(endingDate.value),
+    });
+    console.log(res);
+  } catch (error) {
+    console.error(error);
+  }
+};
+const doThis = () => {
+  console.log(reverseDate(startingDate.value));
+};
 </script>
 
 <style scoped>

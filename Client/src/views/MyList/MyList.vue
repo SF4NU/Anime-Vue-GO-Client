@@ -1,5 +1,16 @@
 <template>
-  <div></div>
+  <section>
+    <h1>My list</h1>
+    <div class="anime-container">
+      <div v-for="(anime, i) in animeListData" :key="i" class="anime-card">
+        <h2>{{ anime.title }}</h2>
+        <div>
+          <h3>{{ anime.episodes }}</h3>
+        </div>
+        <div>{{ anime.rating }}</div>
+      </div>
+    </div>
+  </section>
 </template>
 
 <script setup>
@@ -10,6 +21,7 @@ import axios from "axios";
 const router = useRoute();
 const userId = ref(router.params.userId);
 const checkIfDataFetched = ref(false);
+const animeListData = ref(null);
 
 const getAnimeList = async () => {
   try {
@@ -17,9 +29,8 @@ const getAnimeList = async () => {
       `http://localhost:3000/users/${userId.value}/anime`
     );
     if (res.status >= 200 && res.status <= 209) {
-      console.log(res.data);
+      animeListData.value = res.data;
     } else {
-      console.log(res);
     }
   } catch (error) {
     console.error(error);

@@ -88,6 +88,26 @@ func (h *Handlers) UpdateAnime(c *fiber.Ctx) error {
 		anime.Rating = updatedAnime.Rating
 	}
 
+	if updatedAnime.Comment != anime.Comment {
+		anime.Comment = updatedAnime.Comment
+	}
+
+	if updatedAnime.Episodes != anime.Episodes {
+		anime.Episodes = updatedAnime.Episodes
+	}
+
+	if updatedAnime.PlanToWatch != anime.PlanToWatch {
+		anime.PlanToWatch = updatedAnime.PlanToWatch
+	}
+
+	if updatedAnime.StartingDate != anime.StartingDate {
+		anime.StartingDate = updatedAnime.StartingDate
+	}
+
+	if updatedAnime.EndingDate != anime.EndingDate {
+		anime.EndingDate = updatedAnime.EndingDate
+	}
+
 	if err := h.DB.Save(&anime).Error; err != nil {
 		return err
 	}

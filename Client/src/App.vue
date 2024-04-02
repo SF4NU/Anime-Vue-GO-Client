@@ -82,7 +82,6 @@ watch(
 onMounted(() => {
   FetchAnime();
   FetchManga();
-  console.log(searchedAnime.value);
 });
 </script>
 

@@ -35,7 +35,6 @@ const getUserData = async () => {
     const res = await axios.get(`http://localhost:3000/users/${userId.value}`);
     if (res.status >= 200 && res.status <= 209) {
       userData.value = res.data;
-      console.log(res.data);
     }
   } catch (error) {
     console.error(error);
@@ -46,7 +45,6 @@ onBeforeMount(() => {
   if (!checkIfDataFetched.value) {
     checkIfDataFetched.value = true;
     getUserData();
-    console.log("hello");
     changeLoggedStatus();
   }
 });
