@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/gofiber/fiber/v2"
+	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/sf4nu/Anime-Vue-GO-Client/handlers"
 	"github.com/sf4nu/Anime-Vue-GO-Client/initializers"
 	"github.com/sf4nu/Anime-Vue-GO-Client/middleware"
@@ -19,16 +20,12 @@ func main() {
 	var err error
 	app := fiber.New()
 
-	app.Use(func(c *fiber.Ctx) error {
-		c.Set("Access-Control-Allow-Origin", "*")
-		c.Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
-		c.Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		if c.Method() == "OPTIONS" {
-			c.Status(fiber.StatusOK)
-			return nil
-		}
-		return c.Next()
-	})
+	app.Use(cors.New(cors.Config{
+		AllowHeaders:     "Origin,Content-Type,Accept,Content-Length,Accept-Language,Accept-Encoding,Connection,Access-Control-Allow-Origin",
+		AllowOrigins:     "https://sf4nu.github.io",
+		AllowCredentials: true,
+		AllowMethods:     "GET,POST,HEAD,PUT,DELETE,PATCH,OPTIONS",
+	}))
 
 	app.Post("/register", handlers.CreateUser)
 	app.Post("/login", handlers.LoginUser)
