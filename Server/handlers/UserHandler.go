@@ -8,7 +8,6 @@ import (
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
-	"github.com/joho/godotenv"
 	"github.com/sf4nu/Anime-Vue-GO-Client/initializers"
 	"github.com/sf4nu/Anime-Vue-GO-Client/models"
 	"github.com/sf4nu/Anime-Vue-GO-Client/utils"
@@ -47,10 +46,10 @@ func CreateUser(c *fiber.Ctx) error {
 }
 
 func LoginUser(c *fiber.Ctx) error {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	log.Fatalf("Error loading .env file")
+	// }
 
 	var login models.Login
 

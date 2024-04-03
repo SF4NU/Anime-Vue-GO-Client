@@ -33,7 +33,6 @@ import { ref, provide, inject } from "vue";
 import axios from "axios";
 import { routeLocationKey, useRoute } from "vue-router";
 import router from "@/router";
-// import Cookies from "js-cookie";
 
 const username = ref("");
 const password = ref("");
@@ -41,10 +40,13 @@ const userId = ref(null);
 const getUserId = inject("getUserId");
 const loginUser = async () => {
   try {
-    const res = await axios.post("/api/login", {
-      username: username.value,
-      password: password.value,
-    });
+    const res = await axios.post(
+      "https://anime-vue-go-client-production.up.railway.app/login",
+      {
+        username: username.value,
+        password: password.value,
+      }
+    );
     if (res.status >= 200 && res.status <= 209) {
       username.value = "";
       password.value = "";
