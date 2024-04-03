@@ -22,8 +22,9 @@ func Auth(c *fiber.Ctx) error {
 	}
 
 	cookie := c.Cookies("jwt")
+	fmt.Println(cookie)
 	if cookie == "" {
-		return c.Status(fiber.StatusUnauthorized).SendString("Unauthorized")
+		return c.Status(fiber.StatusUnauthorized).SendString("Unauthorized, cookie not found")
 	}
 
 	SECRET_KEY := os.Getenv("SECRET_KEY")
@@ -36,13 +37,13 @@ func Auth(c *fiber.Ctx) error {
 	})
 
 	if err != nil {
-		return c.Status(fiber.StatusUnauthorized).SendString("Unauthorized")
+		return c.Status(fiber.StatusUnauthorized).SendString("Unauthorized, token not found")
 	}
 
 	if claims, ok := token.Claims.(jwt.MapClaims); ok && token.Valid {
 		c.Locals("user_id", claims["user_id"])
 		if time.Now().Unix() > int64(claims["exp"].(float64)) {
-			return c.Status(fiber.StatusUnauthorized).SendString("Unauthorized")
+			return c.Status(fiber.StatusUnauthorized).SendString("Unauthorized, token expired")
 		}
 
 		var user models.User

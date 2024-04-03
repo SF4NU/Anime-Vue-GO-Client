@@ -103,7 +103,7 @@ func LoginUser(c *fiber.Ctx) error {
 		Expires:  time.Now().Add(time.Hour * 24),
 		HTTPOnly: true,
 		Secure:   false, //IN HTTPS DEVE ESSERE TRUE, IN QUESTO CASO è FALSE PERCHE' STIAMO USANDO HTTP
-		SameSite: "lax",
+		SameSite: "None",
 	})
 
 	return c.SendStatus(fiber.StatusOK)
@@ -216,7 +216,10 @@ func GetUserProfile(c *fiber.Ctx) error {
 }
 
 func Validate(c *fiber.Ctx) error {
-	user := c.Locals("user")
+	user := c.Locals("user").(models.User)
 
-	return c.JSON(user)
+	return c.JSON(fiber.Map{
+		"ID":       user.ID,
+		"Username": user.Username,
+	})
 }

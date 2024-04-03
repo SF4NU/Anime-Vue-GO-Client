@@ -21,6 +21,7 @@ const userId = ref(null);
 provide("userId", userId);
 const getUserId = (id) => {
   userId.value = id;
+  console.log(userId.value);
 };
 provide("getUserId", getUserId);
 const getUserInput = (input) => {
@@ -79,9 +80,24 @@ watch(
   }
 );
 
+const validate = async () => {
+  try {
+    const res = await axios.get("/api/validate", {
+      withCredentials: true,
+    });
+    if (res.status >= 200 && res.status <= 209) {
+      changeLoggedStatus();
+      getUserId(res.data.ID);
+    }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 onMounted(() => {
   FetchAnime();
   FetchManga();
+  validate();
 });
 </script>
 

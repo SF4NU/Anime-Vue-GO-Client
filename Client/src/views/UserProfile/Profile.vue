@@ -32,7 +32,7 @@ const mangaCount = ref(0);
 
 const getUserData = async () => {
   try {
-    const res = await axios.get(`http://localhost:3000/users/${userId.value}`, {
+    const res = await axios.get(`/api/users/${userId.value}`, {
       withCredentials: true,
     });
     if (res.status >= 200 && res.status <= 209) {

@@ -55,9 +55,7 @@ const showComment = ref(false);
 
 const getAnimeList = async () => {
   try {
-    const res = await axios.get(
-      `http://localhost:3000/users/${userId.value}/anime`
-    );
+    const res = await axios.get(`/api/users/${userId.value}/anime`);
     if (res.status >= 200 && res.status <= 209) {
       animeListData.value = res.data;
       console.log(res.data);

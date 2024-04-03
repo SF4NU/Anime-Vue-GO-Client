@@ -1,19 +1,12 @@
 package middleware
 
-import (
-	"github.com/gofiber/fiber/v2"
-)
+// "github.com/gofiber/fiber/v2"
+// "github.com/gofiber/fiber/v2/middleware/cors"
 
-func Cors(app *fiber.App) {
-	app.Use(func(c *fiber.Ctx) error {
-		c.Set("Access-Control-Allow-Origin", c.Get("Origin"))
-		c.Set("Access-Control-Allow-Credentials", "true")
-		c.Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
-		c.Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		if c.Method() == "OPTIONS" {
-			c.Status(fiber.StatusOK)
-			return nil
-		}
-		return c.Next()
-	})
-}
+// func Cors(app *fiber.App) {
+// 	app.Use(cors.New(cors.Config{
+// 		AllowOrigins:     "http://localhost:5173, http://localhost:3000",
+// 		AllowHeaders:     "Origin, Content-Type, Accept",
+// 		AllowCredentials: true,
+// 	}))
+// }

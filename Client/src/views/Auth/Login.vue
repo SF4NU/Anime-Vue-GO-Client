@@ -41,17 +41,24 @@ const userId = ref(null);
 const getUserId = inject("getUserId");
 const loginUser = async () => {
   try {
-    const res = await axios.post("http://localhost:3000/login", {
+    const res = await axios.post("/api/login", {
       username: username.value,
       password: password.value,
     });
     if (res.status >= 200 && res.status <= 209) {
       username.value = "";
       password.value = "";
-
-      userId.value = res.data.user_id;
-      getUserId(userId.value);
-      await router.push(`/profile/${userId.value}`);
+      const res = await axios.get("/api/validate", {
+        withCredentials: true,
+      });
+      if (res.status >= 200 && res.status <= 209) {
+        getUserId(res.data.ID);
+        console.log(res.data.ID);
+        await router.push({ name: "Profile", params: { userId: res.data.ID } });
+      }
+      // userId.value = res.data.user_id;
+      // getUserId(userId.value);
+      // await router.push(`/profile/${userId.value}`);
     }
   } catch (error) {
     console.error(error);

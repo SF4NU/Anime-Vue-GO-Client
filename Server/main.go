@@ -20,7 +20,7 @@ func main() {
 	var err error
 	app := fiber.New()
 
-	middleware.Cors(app)
+	// middleware.Cors(app)
 
 	app.Post("/register", handlers.CreateUser)
 	app.Post("/login", handlers.LoginUser)
