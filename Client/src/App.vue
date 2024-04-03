@@ -100,7 +100,6 @@ const validate = async () => {
 onMounted(() => {
   FetchAnime();
   FetchManga();
-  validate();
 });
 </script>
 
