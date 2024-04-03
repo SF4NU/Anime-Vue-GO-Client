@@ -33,8 +33,8 @@ provide("getUserInput", getUserInput);
 
 const isLoggedIn = ref(false);
 
-const changeLoggedStatus = () => {
-  isLoggedIn.value = true;
+const changeLoggedStatus = (bool) => {
+  isLoggedIn.value = bool;
 };
 
 provide("changeLoggedStatus", changeLoggedStatus);
@@ -86,7 +86,7 @@ const validate = async () => {
       withCredentials: true,
     });
     if (res.status >= 200 && res.status <= 209) {
-      changeLoggedStatus();
+      changeLoggedStatus(true);
       getUserId(res.data.ID);
     }
   } catch (error) {

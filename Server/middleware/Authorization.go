@@ -22,7 +22,6 @@ func Auth(c *fiber.Ctx) error {
 	}
 
 	cookie := c.Cookies("jwt")
-	fmt.Println(cookie)
 	if cookie == "" {
 		return c.Status(fiber.StatusUnauthorized).SendString("Unauthorized, cookie not found")
 	}

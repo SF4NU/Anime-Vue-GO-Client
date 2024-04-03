@@ -2,10 +2,7 @@
   <section>
     <div class="main-profile-div">
       <div v-if="userData" class="profile-picture-div">
-        <img
-          height="200px"
-          src="../../assets/profile-picture.svg"
-          alt="profile-picture" />
+        <img src="../../assets/profile-picture.svg" alt="profile-picture" />
       </div>
       <div v-if="userData" class="profile-details-div">
         <h1>{{ userData.Username }}</h1>
@@ -13,6 +10,12 @@
         ><br />
         <span>Manga count: {{ mangaCount }}</span>
       </div>
+      <img
+        @click="logout"
+        class="logout"
+        height="30px"
+        src="@/assets/logout.svg"
+        alt="" />
     </div>
   </section>
 </template>
@@ -21,8 +24,10 @@
 import { ref, inject, onBeforeMount, provide } from "vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
-const changeLoggedStatus = inject("changeLoggedStatus");
+import router from "@/router";
+import Cookies from "js-cookie";
 
+const changeLoggedStatus = inject("changeLoggedStatus");
 const route = useRoute();
 const userId = ref(route.params.userId);
 const userData = ref(null);
@@ -43,11 +48,24 @@ const getUserData = async () => {
   }
 };
 
+const logout = async () => {
+  try {
+    await axios.post("/api/logout", {
+      withCredentials: true,
+    });
+
+    await changeLoggedStatus(false);
+    await router.push("/login");
+  } catch (error) {
+    console.error(error);
+  }
+};
+
 onBeforeMount(() => {
   if (!checkIfDataFetched.value) {
     checkIfDataFetched.value = true;
     getUserData();
-    changeLoggedStatus();
+    changeLoggedStatus(true);
   }
 });
 </script>
@@ -66,14 +84,42 @@ section {
   background-color: var(--green);
   padding: 20px;
   width: clamp(300px, 70%, 800px);
+  border-radius: 25px;
+  position: relative;
 }
 .main-profile-div h1 {
   font-size: 2rem;
-  margin-top: 10px;
+  margin-top: 20px;
   color: var(--dark-blue);
+  word-break: break-all;
 }
 .main-profile-div span {
   font-size: 1.5rem;
   color: var(--dark-blue);
+}
+.profile-picture-div img {
+  height: 200px;
+}
+@media (max-width: 768px) {
+  .main-profile-div {
+    flex-direction: column;
+    row-gap: 20px;
+    align-items: center;
+    justify-content: center;
+  }
+  .profile-picture-div img {
+    height: 150px;
+  }
+  .profile-picture-div {
+    display: flex;
+    justify-content: center;
+    margin-top: 25px;
+  }
+}
+.logout {
+  position: absolute;
+  right: 12px;
+  top: 12px;
+  cursor: pointer;
 }
 </style>

@@ -223,3 +223,14 @@ func Validate(c *fiber.Ctx) error {
 		"Username": user.Username,
 	})
 }
+
+func Logout(c *fiber.Ctx) error {
+	c.Cookie(&fiber.Cookie{
+		Name:     "jwt",
+		Value:    "",
+		HTTPOnly: true,
+		MaxAge:   -1,
+	})
+
+	return c.SendStatus(fiber.StatusOK)
+}

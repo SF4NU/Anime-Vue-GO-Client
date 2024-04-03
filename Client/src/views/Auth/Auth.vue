@@ -47,6 +47,7 @@
 <script setup>
 import { ref, provide } from "vue";
 import axios, { Axios } from "axios";
+import router from "@/router";
 const email = ref("");
 const username = ref("");
 const password = ref("");
@@ -74,7 +75,7 @@ const checkIfPasswordsMatch = () => {
 const createUser = async () => {
   try {
     if (checkIfPasswordsMatch()) {
-      const res = await axios.post("http://localhost:3000/register", {
+      const res = await axios.post("/api/register", {
         email: email.value,
         username: username.value,
         password: password.value,
@@ -85,6 +86,7 @@ const createUser = async () => {
         username.value = "";
         password.value = "";
         confirmPassword.value = "";
+        await router.push("/login");
       }
     }
   } catch (error) {
