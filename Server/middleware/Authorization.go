@@ -3,23 +3,21 @@ package middleware
 import (
 	"fmt"
 
-	"log"
 	"os"
 
 	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
-	"github.com/joho/godotenv"
 	"github.com/sf4nu/Anime-Vue-GO-Client/initializers"
 	"github.com/sf4nu/Anime-Vue-GO-Client/models"
 )
 
 func Auth(c *fiber.Ctx) error {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	log.Fatalf("Error loading .env file")
+	// }
 
 	cookie := c.Cookies("jwt")
 	if cookie == "" {
