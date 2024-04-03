@@ -1,73 +1,38 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/joho/godotenv"
 	"github.com/sf4nu/Anime-Vue-GO-Client/handlers"
-	"github.com/sf4nu/Anime-Vue-GO-Client/models"
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
+	"github.com/sf4nu/Anime-Vue-GO-Client/initializers"
+	"github.com/sf4nu/Anime-Vue-GO-Client/middleware"
 )
 
-var db *gorm.DB
+func init() {
+	initializers.LoadEnvVariables()
+	initializers.ConnectToDb()
+	initializers.AutoMigrate()
+}
 
 func main() {
-	// err := godotenv.Load(".env")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf("Error loading .env file")
-	}
-
-	dsn := os.Getenv("DATABASE_URL")
-	if dsn == "" {
-		log.Fatal("DATABASE_URL not found")
-	}
-
-	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatalf("failed to connect database: %v", err)
-	}
-
-	fmt.Println("Connection Opened to Database")
-
-	h := &handlers.Handlers{DB: db}
-
-	db.AutoMigrate(&models.User{}, &models.AnimeList{})
-
+	var err error
 	app := fiber.New()
 
-	app.Use(func(c *fiber.Ctx) error {
-		c.Set("Access-Control-Allow-Origin", "*")
-		c.Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE")
-		c.Set("Access-Control-Allow-Headers", "Content-Type, Authorization")
-		if c.Method() == "OPTIONS" {
-			c.Status(fiber.StatusOK)
-			return nil
-		}
-		return c.Next()
-	})
+	middleware.Cors(app)
 
-	app.Get("/", func(c *fiber.Ctx) error {
-		return c.SendString("Hello, World!")
-	})
-	app.Post("/register", h.CreateUser)
-	app.Post("/login", h.LoginUser)
-	app.Post("/add/anime/:userID", h.AddAnime)
-	app.Delete("/delete/anime/:id", h.DeleteAnime)
-	app.Put("/update/anime/:id", h.UpdateAnime)
-	app.Put("/update/user/:id", h.UpdateUser)
-	app.Get("/users/:userID/anime", h.GetAnime)
-	app.Get("/users/", h.GetUsers)
-	app.Get("/users/:id", h.GetUserProfile)
-	app.Delete("/users/delete/:id", h.DeleteUser)
+	app.Post("/register", handlers.CreateUser)
+	app.Post("/login", handlers.LoginUser)
+	app.Get("/validate", middleware.Auth, handlers.Validate)
+	app.Post("/add/anime/:userID", handlers.AddAnime)
+	app.Delete("/delete/anime/:id", handlers.DeleteAnime)
+	app.Put("/update/anime/:id", handlers.UpdateAnime)
+	app.Put("/update/user/:id", handlers.UpdateUser)
+	app.Get("/users/:userID/anime", handlers.GetAnime)
+	app.Get("/users/", handlers.GetUsers)
+	app.Get("/users/:id", middleware.Auth, handlers.GetUserProfile)
+	app.Delete("/users/delete/:id", handlers.DeleteUser)
 
 	port := os.Getenv("PORT")
 

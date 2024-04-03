@@ -16,9 +16,13 @@
         </div>
         <div class="dates-div">
           <span> Inizio: {{ anime.starting_date }} </span><br />
-          <span> Fine: {{ anime.ending_date }} </span>
+          <span v-if="!anime.plan_to_watch && anime.finished">
+            Fine: {{ anime.ending_date }}
+          </span>
         </div>
-        <div class="plan-to-watch-div" v-if="!anime.finished">
+        <div
+          class="plan-to-watch-div"
+          v-if="!anime.finished && anime.plan_to_watch">
           <span> Da vedere ?</span>&nbsp;
           <img
             height="20px"
@@ -56,8 +60,29 @@ const getAnimeList = async () => {
     );
     if (res.status >= 200 && res.status <= 209) {
       animeListData.value = res.data;
+      console.log(res.data);
     } else {
     }
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const updateAnimeCard = () => {
+  try {
+    const res = axios.put(
+      `http://localhost:3000/update/anime/${animeListData.value.ID}`
+    );
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+const deleteAnimeCard = () => {
+  try {
+    const res = axios.delete(
+      `http://localhost:3000/delete/anime/${animeListData.value.ID}`
+    );
   } catch (error) {
     console.error(error);
   }
@@ -88,6 +113,7 @@ h1 {
   margin-left: auto;
   padding: 10px 30px;
   border-radius: 35px;
+  user-select: none;
 }
 .anime-card {
   display: flex;
@@ -98,12 +124,31 @@ h1 {
   border: 1px solid black;
   margin: 10px;
   padding: 20px;
-  border-radius: 45px;
   background: linear-gradient(145deg, #3c997d, #48b695);
   box-shadow: 9px 9px 18px #41a587, -9px -9px 18px #45af8f;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 25px;
   text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.15);
+  transition: transform 0.25s ease, background 0.8s ease, box-shadow 0.8s ease;
+}
+.anime-card:hover {
+  transform: scale(1.02);
+  animation: background-changer 3s linear infinite alternate;
+}
+@keyframes background-changer {
+  0% {
+    box-shadow: 9px 9px 18px #41a587, -9px -9px 18px #45af8f;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+  33% {
+    box-shadow: 10px -10px 20px #3fa083, -10px 10px 20px #47b493;
+  }
+  66% {
+    box-shadow: -10px -10px 20px #3fa083, 10px 10px 20px #47b493;
+  }
+  100% {
+    box-shadow: -10px 10px 20px #3fa083, 10px -10px 20px #47b493;
+  }
 }
 .anime-container {
   display: flex;
@@ -117,6 +162,7 @@ h1 {
 .anime-card h2 {
   font-size: 1.5rem;
   margin: 10px;
+  text-align: center;
 }
 .completed-div {
   display: flex;

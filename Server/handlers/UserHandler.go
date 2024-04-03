@@ -2,13 +2,19 @@ package handlers
 
 import (
 	"fmt"
+	"log"
+	"os"
+	"time"
 
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
+	"github.com/joho/godotenv"
+	"github.com/sf4nu/Anime-Vue-GO-Client/initializers"
 	"github.com/sf4nu/Anime-Vue-GO-Client/models"
 	"github.com/sf4nu/Anime-Vue-GO-Client/utils"
 )
 
-func (h *Handlers) CreateUser(c *fiber.Ctx) error {
+func CreateUser(c *fiber.Ctx) error {
 	var user models.User
 
 	if err := c.BodyParser(&user); err != nil {
@@ -16,12 +22,12 @@ func (h *Handlers) CreateUser(c *fiber.Ctx) error {
 		return err
 	}
 
-	if err := h.DB.Where("username = ?", user.Username).First(&user).Error; err == nil {
+	if err := initializers.DB.Where("username = ?", user.Username).First(&user).Error; err == nil {
 		c.Status(fiber.StatusConflict).SendString("Username already exists")
 		return err
 	}
 
-	if err := h.DB.Where("email = ?", user.Email).First(&user).Error; err == nil {
+	if err := initializers.DB.Where("email = ?", user.Email).First(&user).Error; err == nil {
 		c.Status(fiber.StatusUnauthorized).SendString("Email already exists")
 		return err
 	}
@@ -33,14 +39,19 @@ func (h *Handlers) CreateUser(c *fiber.Ctx) error {
 
 	user.Password = hashedPassword
 
-	if err := h.DB.Create(&user).Error; err != nil {
+	if err := initializers.DB.Create(&user).Error; err != nil {
 		return err
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(user)
 }
 
-func (h *Handlers) LoginUser(c *fiber.Ctx) error {
+func LoginUser(c *fiber.Ctx) error {
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatalf("Error loading .env file")
+	}
+
 	var login models.Login
 
 	if err := c.BodyParser(&login); err != nil {
@@ -52,7 +63,7 @@ func (h *Handlers) LoginUser(c *fiber.Ctx) error {
 
 	username := login.Username
 
-	if err := h.DB.Where("username = ?", username).First(&user).Error; err != nil {
+	if err := initializers.DB.Where("username = ?", username).First(&user).Error; err != nil {
 		c.Status(fiber.StatusForbidden).SendString("Username doesn't exist")
 		fmt.Println(login.Username, user.Username)
 		return err
@@ -63,34 +74,65 @@ func (h *Handlers) LoginUser(c *fiber.Ctx) error {
 		fmt.Println(login.Password, user.Password)
 		return err
 	}
+	//tutto questo codice serve per creare un token jwt
+	//Definizione del payload
+	claims := jwt.MapClaims{}
+	claims["authorized"] = true                           //l'utente è autorizzato
+	claims["user_id"] = user.ID                           //id dell'utente
+	claims["exp"] = time.Now().Add(time.Hour * 24).Unix() //scadenza del token
 
-	return c.Status(fiber.StatusAccepted).JSON(user.ID)
+	//creazione del token
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+
+	SECRET_KEY := os.Getenv("SECRET_KEY")
+	if SECRET_KEY == "" {
+		log.Fatal("SECRET_KEY not found")
+	}
+
+	//firma del token
+	secretKey := []byte(SECRET_KEY)
+	signedToken, err := token.SignedString(secretKey)
+	if err != nil {
+		c.Status(fiber.StatusInternalServerError).SendString("Internal server error")
+		return err
+	}
+
+	c.Cookie(&fiber.Cookie{
+		Name:     "jwt",
+		Value:    signedToken,
+		Expires:  time.Now().Add(time.Hour * 24),
+		HTTPOnly: true,
+		Secure:   false, //IN HTTPS DEVE ESSERE TRUE, IN QUESTO CASO è FALSE PERCHE' STIAMO USANDO HTTP
+		SameSite: "lax",
+	})
+
+	return c.SendStatus(fiber.StatusOK)
 
 }
 
-func (h *Handlers) DeleteUser(c *fiber.Ctx) error {
+func DeleteUser(c *fiber.Ctx) error {
 	id := c.Params("id")
 
 	var user models.User
-	if err := h.DB.Where("id = ?", id).First(&user).Error; err != nil {
+	if err := initializers.DB.Where("id = ?", id).First(&user).Error; err != nil {
 		c.Status(fiber.StatusNotFound).SendString("User not found")
 		return err
 	}
 
 	var animes []models.AnimeList
 
-	if err := h.DB.Where("user_ID = ?", id).Find(&animes).Error; err != nil {
+	if err := initializers.DB.Where("user_ID = ?", id).Find(&animes).Error; err != nil {
 		c.Status(fiber.StatusNotFound).SendString("No anime found")
 		return err
 	}
 
 	for _, anime := range animes {
-		if err := h.DB.Delete(&anime).Error; err != nil {
+		if err := initializers.DB.Delete(&anime).Error; err != nil {
 			c.Status(fiber.StatusInternalServerError).SendString("Internal server error")
 		}
 	}
 
-	if err := h.DB.Delete(&user).Error; err != nil {
+	if err := initializers.DB.Delete(&user).Error; err != nil {
 		c.Status(fiber.StatusInternalServerError).SendString("Internal server error")
 		return err
 	}
@@ -98,7 +140,7 @@ func (h *Handlers) DeleteUser(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusAccepted).SendString("User deleted")
 }
 
-func (h *Handlers) UpdateUser(c *fiber.Ctx) error {
+func UpdateUser(c *fiber.Ctx) error {
 	id := c.Params("id")
 
 	var updatedUser models.User
@@ -109,7 +151,7 @@ func (h *Handlers) UpdateUser(c *fiber.Ctx) error {
 	}
 
 	var user models.User
-	if err := h.DB.First(&user, id).Error; err != nil {
+	if err := initializers.DB.First(&user, id).Error; err != nil {
 		c.Status(fiber.StatusNotFound).SendString("User not found")
 		return err
 	}
@@ -132,7 +174,7 @@ func (h *Handlers) UpdateUser(c *fiber.Ctx) error {
 	// 	user.Email = updatedUser.Email
 	// }
 
-	if err := h.DB.Save(&user).Error; err != nil {
+	if err := initializers.DB.Save(&user).Error; err != nil {
 		c.Status(fiber.StatusInternalServerError).SendString("Internal server error")
 		return err
 	}
@@ -140,22 +182,28 @@ func (h *Handlers) UpdateUser(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusAccepted).SendString("Account modified successfuly")
 }
 
-func (h *Handlers) GetUsers(c *fiber.Ctx) error {
+func GetUsers(c *fiber.Ctx) error {
 	var user []models.User
 
-	if err := h.DB.Find(&user).Error; err != nil {
+	if err := initializers.DB.Find(&user).Error; err != nil {
 		c.Status(fiber.StatusNotFound).SendString("No users found")
 	}
 
 	return c.JSON(user)
 }
 
-func (h *Handlers) GetUserProfile(c *fiber.Ctx) error {
+func GetUserProfile(c *fiber.Ctx) error {
 	id := c.Params("id")
+
+	authUserID := fmt.Sprintf("%.0f", c.Locals("user_id").(float64))
+
+	if authUserID != id {
+		return c.Status(fiber.StatusUnauthorized).SendString("Unauthorized")
+	}
 
 	var user models.User
 
-	if err := h.DB.First(&user, id).Error; err != nil {
+	if err := initializers.DB.First(&user, id).Error; err != nil {
 		c.Status(fiber.StatusNotFound).SendString("User Not found")
 		return err
 	}
@@ -165,4 +213,10 @@ func (h *Handlers) GetUserProfile(c *fiber.Ctx) error {
 		"Email":    user.Email,
 		"Username": user.Username,
 	})
+}
+
+func Validate(c *fiber.Ctx) error {
+	user := c.Locals("user")
+
+	return c.JSON(user)
 }

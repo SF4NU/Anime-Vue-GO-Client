@@ -33,6 +33,7 @@ import { ref, provide, inject } from "vue";
 import axios from "axios";
 import { routeLocationKey, useRoute } from "vue-router";
 import router from "@/router";
+// import Cookies from "js-cookie";
 
 const username = ref("");
 const password = ref("");
@@ -44,11 +45,11 @@ const loginUser = async () => {
       username: username.value,
       password: password.value,
     });
-
     if (res.status >= 200 && res.status <= 209) {
       username.value = "";
       password.value = "";
-      userId.value = res.data;
+
+      userId.value = res.data.user_id;
       getUserId(userId.value);
       await router.push(`/profile/${userId.value}`);
     }
