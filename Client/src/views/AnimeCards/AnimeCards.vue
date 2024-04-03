@@ -295,7 +295,7 @@ const submitAnime = async () => {
     }
     if (checkIfPlanToWatch.value) {
       const res = await axios.post(
-        `http://localhost:3000/add/anime/${userId.value}`,
+        `https://anime-vue-go-client-production.up.railway.app/add/anime/${userId.value}`,
         {
           title: data.value[isAdding.value].attributes.canonicalTitle,
           finished: false,
@@ -312,7 +312,7 @@ const submitAnime = async () => {
       return;
     } else {
       const res = await axios.post(
-        `http://localhost:3000/add/anime/${userId.value}`,
+        `https://anime-vue-go-client-production.up.railway.app/add/anime/${userId.value}`,
         {
           title: data.value[isAdding.value].attributes.canonicalTitle,
           finished: animeCompleted.value,

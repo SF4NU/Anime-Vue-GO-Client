@@ -48,9 +48,12 @@ const loginUser = async () => {
     if (res.status >= 200 && res.status <= 209) {
       username.value = "";
       password.value = "";
-      const res = await axios.get("/api/validate", {
-        withCredentials: true,
-      });
+      const res = await axios.get(
+        "https://anime-vue-go-client-production.up.railway.app/validate",
+        {
+          withCredentials: true,
+        }
+      );
       if (res.status >= 200 && res.status <= 209) {
         getUserId(res.data.ID);
         console.log(res.data.ID);

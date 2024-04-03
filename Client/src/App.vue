@@ -82,9 +82,12 @@ watch(
 
 const validate = async () => {
   try {
-    const res = await axios.get("/api/validate", {
-      withCredentials: true,
-    });
+    const res = await axios.get(
+      "https://anime-vue-go-client-production.up.railway.app/validate",
+      {
+        withCredentials: true,
+      }
+    );
     if (res.status >= 200 && res.status <= 209) {
       changeLoggedStatus(true);
       getUserId(res.data.ID);

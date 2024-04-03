@@ -75,11 +75,14 @@ const checkIfPasswordsMatch = () => {
 const createUser = async () => {
   try {
     if (checkIfPasswordsMatch()) {
-      const res = await axios.post("/api/register", {
-        email: email.value,
-        username: username.value,
-        password: password.value,
-      });
+      const res = await axios.post(
+        "https://anime-vue-go-client-production.up.railway.app/register",
+        {
+          email: email.value,
+          username: username.value,
+          password: password.value,
+        }
+      );
       console.log(res);
       if (res.request.status >= 200 && res.request.status <= 209) {
         email.value = "";

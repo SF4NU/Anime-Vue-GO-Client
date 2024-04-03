@@ -55,7 +55,9 @@ const showComment = ref(false);
 
 const getAnimeList = async () => {
   try {
-    const res = await axios.get(`/api/users/${userId.value}/anime`);
+    const res = await axios.get(
+      `https://anime-vue-go-client-production.up.railway.app/users/${userId.value}/anime`
+    );
     if (res.status >= 200 && res.status <= 209) {
       animeListData.value = res.data;
       console.log(res.data);
@@ -69,7 +71,7 @@ const getAnimeList = async () => {
 const updateAnimeCard = () => {
   try {
     const res = axios.put(
-      `http://localhost:3000/update/anime/${animeListData.value.ID}`
+      `https://anime-vue-go-client-production.up.railway.app/update/anime/${animeListData.value.ID}`
     );
   } catch (error) {
     console.error(error);
@@ -79,7 +81,7 @@ const updateAnimeCard = () => {
 const deleteAnimeCard = () => {
   try {
     const res = axios.delete(
-      `http://localhost:3000/delete/anime/${animeListData.value.ID}`
+      `https://anime-vue-go-client-production.up.railway.app/delete/anime/${animeListData.value.ID}`
     );
   } catch (error) {
     console.error(error);
