@@ -45,6 +45,9 @@ const loginUser = async () => {
       {
         username: username.value,
         password: password.value,
+      },
+      {
+        withCredentials: true,
       }
     );
     if (res.status >= 200 && res.status <= 209) {

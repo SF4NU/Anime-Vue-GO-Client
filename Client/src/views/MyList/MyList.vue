@@ -56,7 +56,10 @@ const showComment = ref(false);
 const getAnimeList = async () => {
   try {
     const res = await axios.get(
-      `https://anime-vue-go-client-production.up.railway.app/users/${userId.value}/anime`
+      `https://anime-vue-go-client-production.up.railway.app/users/${userId.value}/anime`,
+      {
+        withCredentials: true,
+      }
     );
     if (res.status >= 200 && res.status <= 209) {
       animeListData.value = res.data;
