@@ -297,6 +297,7 @@ const submitAnime = async () => {
       const res = await axios.post(
         `https://anime-vue-go-client-production.up.railway.app/add/anime/${userId.value}`,
         {
+          withCredentials: true,
           title: data.value[isAdding.value].attributes.canonicalTitle,
           finished: false,
           episodes: 0,

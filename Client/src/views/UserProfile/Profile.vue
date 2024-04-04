@@ -53,7 +53,7 @@ const getUserData = async () => {
 
 const logout = async () => {
   try {
-    await axios.post("/api/logout", {
+    await axios.post("https://anime-vue-go-client-production.up.railway.app/logout/logout", {
       withCredentials: true,
     });
 
