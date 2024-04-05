@@ -4,6 +4,12 @@
     <meta charset="UTF-8" />
     <link rel="icon" href="animiru-svgrepo-com.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script>
+      if (sessionStorage.redirect) {
+        history.replaceState({}, "", sessionStorage.redirect);
+        delete sessionStorage.redirect;
+      }
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
