@@ -297,7 +297,6 @@ const submitAnime = async () => {
       const res = await axios.post(
         `https://anime-vue-go-client-production.up.railway.app/add/anime/${userId.value}`,
         {
-          withCredentials: true,
           title: data.value[isAdding.value].attributes.canonicalTitle,
           finished: false,
           episodes: 0,
@@ -306,6 +305,9 @@ const submitAnime = async () => {
           starting_date: reverseDate(startingDate.value),
           ending_date: "N/A",
           plan_to_watch: true,
+        },
+        {
+          withCredentials: true,
         }
       );
       console.log(res);
@@ -326,6 +328,9 @@ const submitAnime = async () => {
           starting_date: reverseDate(startingDate.value),
           ending_date: reverseDate(endingDate.value),
           plan_to_watch: false,
+        },
+        {
+          withCredentials: true,
         }
       );
       console.log(res);
