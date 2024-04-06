@@ -100,7 +100,7 @@ func LoginUser(c *fiber.Ctx) error {
 		Name:     "jwt",
 		Value:    signedToken,
 		Expires:  time.Now().Add(time.Hour * 24),
-		HTTPOnly: true,
+		HTTPOnly: false,
 		Secure:   true, //IN HTTPS DEVE ESSERE TRUE, IN QUESTO CASO è FALSE PERCHE' STIAMO USANDO HTTP
 		SameSite: "None",
 	})

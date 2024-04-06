@@ -53,15 +53,17 @@ const getUserData = async () => {
 
 const logout = async () => {
   try {
-    await axios.post(
+    const res = await axios.post(
       "https://anime-vue-go-client-production.up.railway.app/logout",
       {
         withCredentials: true,
       }
     );
-
-    await changeLoggedStatus(false);
-    await router.push("/login");
+    if (res.status >= 200 && res.status <= 209) {
+      document.cookie = "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      await changeLoggedStatus(false);
+      await router.push("/login");
+    }
   } catch (error) {
     console.error(error);
   }
