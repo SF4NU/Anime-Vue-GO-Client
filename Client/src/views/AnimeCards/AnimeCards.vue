@@ -305,7 +305,7 @@ const submitAnime = async () => {
           starting_date: reverseDate(startingDate.value),
           ending_date: "N/A",
           plan_to_watch: true,
-          anime_id: data.value[isAdding.value].id,
+          anime_id: parseInt(data.value[isAdding.value].id),
         },
         {
           withCredentials: true,
@@ -329,7 +329,7 @@ const submitAnime = async () => {
           starting_date: reverseDate(startingDate.value),
           ending_date: reverseDate(endingDate.value),
           plan_to_watch: false,
-          anime_id: data.value[isAdding.value].id,
+          anime_id: parseInt(data.value[isAdding.value].id),
         },
         {
           withCredentials: true,
