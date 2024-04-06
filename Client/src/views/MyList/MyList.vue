@@ -1,9 +1,19 @@
 <template>
   <section>
     <h1>My list</h1>
+    <!-- <div class="search-div">
+      <input
+        v-model="animeTitle"
+        v-on:input="handleSearch"
+        type="text"
+        class="search-in-list"
+        :placeholder="placeholderText" />
+    </div> -->
     <div class="anime-container">
       <div v-for="(anime, i) in animeListData" :key="i" class="anime-card">
-        <div class="anime-card-wrap" v-if="isEditing !== i">
+        <div
+          class="anime-card-wrap"
+          v-if="isEditing !== i && anime.title !== searchedAnime">
           <h2>{{ anime.title }}</h2>
           <div>
             <span> Episodi guardati: {{ anime.episodes }} </span>
@@ -165,7 +175,7 @@
 </template>
 
 <script setup>
-import { onBeforeMount, ref } from "vue";
+import { onBeforeMount, onMounted, ref } from "vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
 import check from "@/assets/check.svg";
@@ -188,8 +198,19 @@ const isLoading = ref(false);
 const displayText = ref(false);
 const textAreaLength = ref("");
 const lengthCounter = ref(0);
+const animeTitle = ref("");
+const placeholderText = ref("");
+const placeholders = ref([]);
+const searchedAnime = ref("");
 
 const singleAnimeData = ref(null);
+
+const handleSearch = () => {
+  searchedAnime.value = animeListData.value.filter((anime) =>
+    anime.title.toLowerCase().includes(animeTitle.value.toLowerCase())
+  );
+  console.log(searchedAnime.value);
+};
 
 const setCountersToZero = () => {
   episodes.value = 0;
@@ -301,6 +322,7 @@ const getAnimeList = async () => {
       animeListData.value = res.data.sort((a, b) =>
         a.title.localeCompare(b.title)
       );
+      placeholders.value = animeListData.value.map((anime) => anime.title);
       isEditing.value = null;
       isLoading.value = false;
     } else {
@@ -374,6 +396,30 @@ onBeforeMount(() => {
   if (!checkIfDataFetched.value) {
     checkIfDataFetched.value = true;
     getAnimeList();
+    // let i = 0;
+    // let j = 0;
+    // let forward = true;
+    // setInterval(() => {
+    //   if (forward) {
+    //     if (j < placeholders.value[i].length) {
+    //       placeholderText.value += placeholders.value[i][j];
+    //       j++;
+    //     } else {
+    //       forward = false;
+    //     }
+    //   } else {
+    //     if (j > 0) {
+    //       placeholderText.value = placeholderText.value.slice(0, -1);
+    //       j--;
+    //     } else {
+    //       forward = true;
+    //       i++;
+    //       if (i === placeholders.value.length) {
+    //         i = 0;
+    //       }
+    //     }
+    //   }
+    // }, 150);
   }
 });
 
@@ -881,5 +927,34 @@ button {
 }
 section {
   margin-bottom: 150px;
+}
+.search-div {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 50px;
+}
+.search-in-list {
+  width: 200px;
+  height: 30px;
+  border-radius: 20px;
+  padding: 5px;
+  text-indent: 15px;
+  font-size: 14px;
+  transition: border-radius 0.525s ease, width 0.525s ease;
+  background: linear-gradient(145deg, var(--green), var(--dark-blue));
+  font-family: Rubik;
+  color: var(--yellow);
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.15);
+}
+.search-in-list:focus {
+  border-radius: 0;
+  outline: none;
+  width: 300px;
+  background: linear-gradient(145deg, var(--dark-blue), var(--green));
+}
+.search-in-list::placeholder {
+  color: rgba(255, 255, 255, 0.671);
+  font-family: Rubik;
 }
 </style>

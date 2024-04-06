@@ -21,7 +21,6 @@ const userId = ref(null);
 provide("userId", userId);
 const getUserId = (id) => {
   userId.value = id;
-  console.log(userId.value);
 };
 provide("getUserId", getUserId);
 const getUserInput = (input) => {

@@ -35,7 +35,7 @@
             &nbsp;&nbsp;&nbsp;&nbsp;
             <span
               >Durata episodio:
-              {{ data[passIndex].attributes.episodeLength }}</span
+              {{ data[passIndex].attributes.episodeLength }} min</span
             >
           </div>
           <div class="dates-div">

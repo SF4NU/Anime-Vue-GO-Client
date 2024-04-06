@@ -12,8 +12,10 @@
             :alt="anime.attributes.canonicalTitle + ' poster'" />
         </router-link>
       </div>
-      <div v-else-if="isLoading" class="loader"></div>
-      <div class="card-details" v-if="isAdding !== i">
+      <div v-else-if="isLoading" class="wrap-loader-error">
+        <div class="loader2"></div>
+      </div>
+      <div class="card-details" v-if="isAdding !== i && !isLoading">
         <div>
           <router-link
             :to="{ name: 'AnimeInfo', params: { id: i } }"
@@ -47,7 +49,7 @@
           </span>
         </div>
       </div>
-      <div class="rating-div" v-if="isAdding !== i">
+      <div class="rating-div" v-if="isAdding !== i && !isLoading">
         <img
           height="25px"
           src="../../assets/star-circle-svgrepo-com.svg"
@@ -57,7 +59,7 @@
         </span>
       </div>
       <div
-        v-if="isAdding !== i"
+        v-if="isAdding !== i && !isLoading"
         class="trailer-link-div"
         :data-tooltip="`https://www.youtube.com/watch?v=${anime.attributes.youtubeVideoId}`">
         <span
@@ -79,7 +81,8 @@
           :src="isAdding !== i ? plus : close"
           alt="add-to-list"
           @click="isAddingAnime(i)"
-          id="add-to-list-button" />
+          id="add-to-list-button"
+          v-if="!isLoading" />
       </div>
       <div
         class="add-to-list-expanded-div"
@@ -638,25 +641,6 @@ const handleSubmitErrors = () => {
 .comment-div textarea:focus {
   outline: none;
 }
-.loader {
-  width: 32px;
-  height: 16px;
-  display: flex;
-  margin-top: 50px;
-}
-.loader:before,
-.loader:after {
-  content: "";
-  flex: 1;
-  background: #3fb8af;
-  transform-origin: top right;
-  animation: l10-1 1s infinite;
-}
-.loader:after {
-  background: #ff3d7f;
-  transform-origin: top left;
-  animation-delay: 0.15s;
-}
 .text-area-div {
   display: flex;
   position: relative;
@@ -839,13 +823,6 @@ const handleSubmitErrors = () => {
   transform: translateX(calc(var(--switch_width) - var(--switch_height)))
     translateY(-0.3em);
   box-shadow: 0 0.3em 0 var(--outline_color);
-}
-.loader-wrapper {
-  height: 200px;
-  width: fit-content;
-  display: flex;
-  justify-content: center;
-  align-items: center;
 }
 .loader2 {
   height: 35px;
