@@ -3,10 +3,14 @@
   <div class="main-anime-card-div">
     <div v-for="(manga, i) in dataManga" :key="i" class="main-anime-display">
       <div v-if="!isLoading" class="poster-div">
-        <img
-          class="anime-poster"
-          :src="manga.attributes.posterImage.tiny"
-          :alt="manga.attributes.canonicalTitle + ' poster'" />
+        <router-link
+          :to="{ name: 'MangaInfo', params: { id: i } }"
+          class="router-link">
+          <img
+            class="anime-poster"
+            :src="manga.attributes.posterImage.tiny"
+            :alt="manga.attributes.canonicalTitle + ' poster'" />
+        </router-link>
       </div>
       <div v-else-if="isLoading" class="loader"></div>
       <div class="card-details">

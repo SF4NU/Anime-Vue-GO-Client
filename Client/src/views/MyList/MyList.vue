@@ -8,7 +8,7 @@
           <div>
             <span> Episodi guardati: {{ anime.episodes }} </span>
           </div>
-          <div>
+          <div v-if="!anime.plan_to_watch">
             <span> Voto assegnato: {{ anime.rating }} </span>
           </div>
           <div class="completed-div">
@@ -16,7 +16,9 @@
             <img height="20px" :src="anime.finished ? check : cross" alt="" />
           </div>
           <div class="dates-div">
-            <span> Inizio: {{ anime.starting_date }} </span><br />
+            <span v-if="anime.starting_date !== ''">
+              Inizio: {{ anime.starting_date }} </span
+            ><br />
             <span v-if="!anime.plan_to_watch && anime.finished">
               Fine: {{ anime.ending_date }}
             </span>
@@ -30,7 +32,7 @@
               :src="anime.plan_to_watch ? check : cross"
               alt="" />
           </div>
-          <div class="comment-div">
+          <div class="comment-div" v-if="anime.comment !== ''">
             <button class="comment-button" :data-comment="anime.comment">
               Nota &nbsp; <img height="25px" src="@/assets/cursor.svg" alt="" />
             </button>
@@ -143,8 +145,15 @@
           <div class="submit-anime-div" v-if="!isLoading">
             <button @click="updateAnimeCard">Modifica</button>
           </div>
-          <div class="remove-anime-div" data-remove="Rimuovi dalla lista">
-            <img height="30px" src="@/assets/bin.svg" alt="" />
+          <div
+            v-if="!isLoading"
+            class="remove-anime-div"
+            data-remove="Rimuovi dalla lista">
+            <img
+              @click="deleteAnimeCard"
+              height="30px"
+              src="@/assets/bin.svg"
+              alt="" />
           </div>
           <div v-if="isLoading" class="loader-wrapper">
             <div class="loader"></div>
@@ -174,7 +183,6 @@ const finished = ref(false);
 const starting_date = ref("");
 const ending_date = ref("");
 const plan_to_watch = ref(false);
-const comment = ref("");
 const animeID = ref(null);
 const isLoading = ref(false);
 const displayText = ref(false);
@@ -190,7 +198,7 @@ const setCountersToZero = () => {
   starting_date.value = "";
   ending_date.value = "";
   plan_to_watch.value = false;
-  comment.value = "";
+  textAreaLength.value = "";
   plan_to_watch.value = false;
 };
 
@@ -265,6 +273,22 @@ const decrementEpisodeCount = (maxEp) => {
   checkIfAnimeCompleted(maxEp);
 };
 
+const incrementUserRating = () => {
+  if (rating.value >= 10) {
+    rating.value = 10;
+    return;
+  }
+  rating.value += 0.5;
+};
+
+const decrementUserRating = () => {
+  if (rating.value <= 1) {
+    rating.value = 1;
+    return;
+  }
+  rating.value -= 0.5;
+};
+
 const getAnimeList = async () => {
   try {
     const res = await axios.get(
@@ -274,8 +298,11 @@ const getAnimeList = async () => {
       }
     );
     if (res.status >= 200 && res.status <= 209) {
-      animeListData.value = res.data;
-      console.log(res.data);
+      animeListData.value = res.data.sort((a, b) =>
+        a.title.localeCompare(b.title)
+      );
+      isEditing.value = null;
+      isLoading.value = false;
     } else {
     }
   } catch (error) {
@@ -287,42 +314,59 @@ const reverseDate = (date) => {
   return date.split("-").reverse().join("-");
 };
 
-const updateAnimeCard = () => {
+const updateAnimeCard = async () => {
   try {
     isLoading.value = true;
-    const res = axios.put(
+    const res = await axios.put(
       `https://anime-vue-go-client-production.up.railway.app/update/anime/${animeID.value}`,
       {
-        episodes: episodes.value,
+        episodes:
+          episodes.value === "Finito"
+            ? singleAnimeData.value.attributes.episodeCount
+            : episodes.value,
         rating: rating.value,
         finished: finished.value,
         starting_date:
           starting_date.value !== "" ? reverseDate(starting_date.value) : "",
         ending_date:
-          ending_date.value !== "" ? reverseDate(ending_date.value) : "",
+          ending_date.value !== "" && finished.value
+            ? reverseDate(ending_date.value)
+            : "",
         plan_to_watch: plan_to_watch.value,
-        comment: comment.value,
+        comment: textAreaLength.value,
       },
       {
         withCredentials: true,
       }
     );
-    isLoading.value = false;
-    console.log(res);
-    getAnimeList();
-    isEditing.value = null;
+
+    if (res.status >= 200 && res.status <= 209) {
+      getAnimeList();
+      isEditing.value = null;
+      isLoading.value = false;
+    } else {
+      isLoading.value = false;
+    }
   } catch (error) {
     console.error(error);
   }
 };
 
-const deleteAnimeCard = () => {
+const deleteAnimeCard = async () => {
   try {
-    const res = axios.delete(
-      `https://anime-vue-go-client-production.up.railway.app/delete/anime/${animeID.value}`
+    isLoading.value = true;
+    const res = await axios.delete(
+      `https://anime-vue-go-client-production.up.railway.app/delete/anime/${animeID.value}`,
+      {
+        withCredentials: true,
+      }
     );
+    if (res.status >= 200 && res.status <= 209) {
+      getAnimeList();
+    }
   } catch (error) {
     console.error(error);
+    isLoading.value = false;
   }
 };
 
@@ -726,17 +770,34 @@ button {
 }
 
 .loader {
-  width: 50px;
-  aspect-ratio: 1;
-  border-radius: 50%;
-  background: radial-gradient(farthest-side, #f03355 95%, #0000) 50% 1px/12px
-      12px no-repeat,
-    radial-gradient(farthest-side, #0000 calc(100% - 14px), #ccc 0);
-  animation: l9 2s infinite linear;
+  height: 35px;
+  width: 80px;
+  margin-left: 0px;
+  background: radial-gradient(farthest-side, #ffd1d1 94%, #0000) 4px 22px/5px
+      5px,
+    radial-gradient(farthest-side, #ffd1d1 94%, #0000) 12px 18px/5px 5px,
+    radial-gradient(farthest-side, #ffd1d1 94%, #0000) 3px 6px/8px 8px,
+    radial-gradient(farthest-side, #eb8594 90%, #0000 94%) left/20px 100%,
+    #bd3342;
+  background-repeat: no-repeat;
+  border-radius: 0 50px 50px 0;
+  border-top-left-radius: 30px 40px;
+  border-bottom-left-radius: 30px 40px;
+  animation: l7 1.5s infinite steps(10);
+  position: relative;
 }
-@keyframes l9 {
-  to {
-    transform: rotate(1turn);
+.loader::before {
+  content: " ";
+  position: absolute;
+  inset: calc(50% - 8px) -10px calc(50% - 8px) auto;
+  width: 15px;
+  background: #bd3342;
+  clip-path: polygon(0 50%, 100% 0, 70% 50%, 100% 100%);
+}
+@keyframes l7 {
+  100% {
+    width: 20px;
+    margin-left: 60px;
   }
 }
 
@@ -817,5 +878,8 @@ button {
   transform: translateX(calc(var(--switch_width) - var(--switch_height)))
     translateY(-0.3em);
   box-shadow: 0 0.3em 0 var(--outline_color);
+}
+section {
+  margin-bottom: 150px;
 }
 </style>

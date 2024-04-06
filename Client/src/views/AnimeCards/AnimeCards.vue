@@ -3,10 +3,14 @@
   <div class="main-anime-card-div">
     <div v-for="(anime, i) in data" :key="i" class="main-anime-display">
       <div v-if="!isLoading && isAdding !== i" class="poster-div">
-        <img
-          class="anime-poster"
-          :src="anime.attributes.posterImage.tiny"
-          :alt="anime.attributes.canonicalTitle + ' poster'" />
+        <router-link
+          :to="{ name: 'AnimeInfo', params: { id: i } }"
+          class="router-link">
+          <img
+            class="anime-poster"
+            :src="anime.attributes.posterImage.tiny"
+            :alt="anime.attributes.canonicalTitle + ' poster'" />
+        </router-link>
       </div>
       <div v-else-if="isLoading" class="loader"></div>
       <div class="card-details" v-if="isAdding !== i">
@@ -77,7 +81,9 @@
           @click="isAddingAnime(i)"
           id="add-to-list-button" />
       </div>
-      <div class="add-to-list-expanded-div" v-if="isAdding === i">
+      <div
+        class="add-to-list-expanded-div"
+        v-if="isAdding === i && !isLoadingAdding">
         <h3>
           Aggiungi: &nbsp;
           {{
@@ -177,6 +183,14 @@
           <button @click="submitAnime">Aggiungi</button>
         </div>
       </div>
+      <div class="wrap-loader-error" v-if="isLoadingAdding && isAdding === i">
+        <div class="loader2"></div>
+        <div class="error-response-div">
+          <span>
+            {{ addingResponse }}
+          </span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -194,7 +208,9 @@ import SubHeader from "@/components/SubHeader/SubHeader.vue";
 import close from "@/assets/close.svg";
 import plus from "@/assets/plus.svg";
 import axios from "axios";
+import { timeout } from "../../utils/timeout";
 
+const isLoadingAdding = ref(false);
 const isLoggedIn = inject("isLoggedIn");
 const checkIfPlanToWatch = ref(false);
 const textAreaLength = ref("");
@@ -202,6 +218,7 @@ const lengthCounter = ref(0);
 const updateLengthCounter = () => {
   lengthCounter.value = textAreaLength.value.length;
 };
+const addingResponse = ref(null);
 const animeCompleted = ref(false);
 const isAdding = ref(null);
 const isAddingAnime = (i) => {
@@ -291,11 +308,7 @@ const reverseDate = (date) => {
 const userId = inject("userId");
 const submitAnime = async () => {
   try {
-    console.log(userId);
-    if (!isLoggedIn.value) {
-      console.log("You need to be logged in to add anime to your list");
-      return;
-    }
+    isLoadingAdding.value = true;
     if (checkIfPlanToWatch.value) {
       const res = await axios.post(
         `https://anime-vue-go-client-production.up.railway.app/add/anime/${userId.value}`,
@@ -304,9 +317,10 @@ const submitAnime = async () => {
           finished: false,
           episodes: 0,
           rating: 0,
-          comment: "N/A",
-          starting_date: reverseDate(startingDate.value),
-          ending_date: "N/A",
+          comment: "",
+          starting_date:
+            startingDate.value !== "" ? reverseDate(startingDate.value) : "",
+          ending_date: "",
           plan_to_watch: true,
           anime_id: parseInt(data.value[isAdding.value].id),
         },
@@ -314,8 +328,10 @@ const submitAnime = async () => {
           withCredentials: true,
         }
       );
-      console.log(res);
-      isAdding.value = null;
+      if (res.status >= 200 && res.status <= 209) {
+        isAdding.value = null;
+        isLoadingAdding.value = false;
+      }
       return;
     } else {
       const res = await axios.post(
@@ -328,7 +344,7 @@ const submitAnime = async () => {
               ? data.value[isAdding.value].attributes.episodeCount
               : episodeCount.value,
           rating: userRating.value,
-          comment: textAreaLength.value === "" ? "N/A" : textAreaLength.value,
+          comment: textAreaLength.value,
           starting_date: reverseDate(startingDate.value),
           ending_date: reverseDate(endingDate.value),
           plan_to_watch: false,
@@ -338,15 +354,34 @@ const submitAnime = async () => {
           withCredentials: true,
         }
       );
-      console.log(res);
-      isAdding.value = null;
+      if (res.status >= 200 && res.status <= 209) {
+        isAdding.value = null;
+        isLoadingAdding.value = false;
+      }
     }
   } catch (error) {
     console.error(error);
+    if (error.response.status === 409) {
+      addingResponse.value = "Anime già presente nella tua lista";
+      await timeout(2500);
+      handleSubmitErrors();
+    } else if (error.response.status === 400) {
+      addingResponse.value = "Errore, riprova più tardi";
+      await timeout(2500);
+      handleSubmitErrors();
+    } else if (error.response.status === 401) {
+      addingResponse.value =
+        "Devi essere registrato per aggiungere anime alla lista!";
+      await timeout(3000);
+      handleSubmitErrors();
+    }
   }
 };
-const doThis = () => {
-  console.log(checkIfPlanToWatch.value);
+
+const handleSubmitErrors = () => {
+  isAdding.value = null;
+  isLoadingAdding.value = false;
+  addingResponse.value = null;
 };
 </script>
 
@@ -691,6 +726,20 @@ const doThis = () => {
 .submit-anime-div button:active {
   filter: brightness(0.8);
 }
+.error-response-div {
+  color: var(--red);
+  font-weight: 600;
+  margin-top: 10px;
+  text-align: center;
+  width: 80%;
+}
+.wrap-loader-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
 @keyframes l10-1 {
   0%,
   5% {
@@ -790,5 +839,43 @@ const doThis = () => {
   transform: translateX(calc(var(--switch_width) - var(--switch_height)))
     translateY(-0.3em);
   box-shadow: 0 0.3em 0 var(--outline_color);
+}
+.loader-wrapper {
+  height: 200px;
+  width: fit-content;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.loader2 {
+  height: 35px;
+  width: 80px;
+  margin-left: 0px;
+  background: radial-gradient(farthest-side, #ffd1d1 94%, #0000) 4px 22px/5px
+      5px,
+    radial-gradient(farthest-side, #ffd1d1 94%, #0000) 12px 18px/5px 5px,
+    radial-gradient(farthest-side, #ffd1d1 94%, #0000) 3px 6px/8px 8px,
+    radial-gradient(farthest-side, #eb8594 90%, #0000 94%) left/20px 100%,
+    #bd3342;
+  background-repeat: no-repeat;
+  border-radius: 0 50px 50px 0;
+  border-top-left-radius: 30px 40px;
+  border-bottom-left-radius: 30px 40px;
+  animation: l7 2.5s infinite steps(10);
+  position: relative;
+}
+.loader::before {
+  content: " ";
+  position: absolute;
+  inset: calc(50% - 8px) -10px calc(50% - 8px) auto;
+  width: 15px;
+  background: #bd3342;
+  clip-path: polygon(0 50%, 100% 0, 70% 50%, 100% 100%);
+}
+@keyframes l7 {
+  100% {
+    width: 20px;
+    margin-left: 60px;
+  }
 }
 </style>
