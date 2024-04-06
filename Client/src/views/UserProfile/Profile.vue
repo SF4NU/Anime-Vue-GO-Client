@@ -60,7 +60,8 @@ const logout = async () => {
       }
     );
     if (res.status >= 200 && res.status <= 209) {
-      document.cookie = "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+      console.log(document.cookie);
+      Cookies.remove("jwt");
       await changeLoggedStatus(false);
       await router.push("/login");
     }

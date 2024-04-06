@@ -3,37 +3,83 @@
     <h1>My list</h1>
     <div class="anime-container">
       <div v-for="(anime, i) in animeListData" :key="i" class="anime-card">
-        <h2>{{ anime.title }}</h2>
-        <div>
-          <span> Episodi guardati: {{ anime.episodes }} </span>
+        <div class="anime-card-wrap" v-if="isEditing !== i">
+          <h2>{{ anime.title }}</h2>
+          <div>
+            <span> Episodi guardati: {{ anime.episodes }} </span>
+          </div>
+          <div>
+            <span> Voto assegnato: {{ anime.rating }} </span>
+          </div>
+          <div class="completed-div">
+            <span>Completato: </span>
+            <img height="20px" :src="anime.finished ? check : cross" alt="" />
+          </div>
+          <div class="dates-div">
+            <span> Inizio: {{ anime.starting_date }} </span><br />
+            <span v-if="!anime.plan_to_watch && anime.finished">
+              Fine: {{ anime.ending_date }}
+            </span>
+          </div>
+          <div
+            class="plan-to-watch-div"
+            v-if="!anime.finished && anime.plan_to_watch">
+            <span> Da vedere ?</span>&nbsp;
+            <img
+              height="20px"
+              :src="anime.plan_to_watch ? check : cross"
+              alt="" />
+          </div>
+          <div class="comment-div">
+            <button class="comment-button" :data-comment="anime.comment">
+              Nota &nbsp; <img height="25px" src="@/assets/cursor.svg" alt="" />
+            </button>
+            <p v-if="showComment" class="show-comment">{{ anime.comment }}</p>
+          </div>
+          <div class="edit-div">
+            <img
+              @click="handleIsEditing(i)"
+              height="25px"
+              src="@/assets/edit.svg"
+              alt="" />
+          </div>
         </div>
-        <div>
-          <span> Voto assegnato: {{ anime.rating }} </span>
-        </div>
-        <div class="completed-div">
-          <span>Completato: </span>
-          <img height="20px" :src="anime.finished ? check : cross" alt="" />
-        </div>
-        <div class="dates-div">
-          <span> Inizio: {{ anime.starting_date }} </span><br />
-          <span v-if="!anime.plan_to_watch && anime.finished">
-            Fine: {{ anime.ending_date }}
-          </span>
-        </div>
-        <div
-          class="plan-to-watch-div"
-          v-if="!anime.finished && anime.plan_to_watch">
-          <span> Da vedere ?</span>&nbsp;
-          <img
-            height="20px"
-            :src="anime.plan_to_watch ? check : cross"
-            alt="" />
-        </div>
-        <div class="comment-div">
-          <button class="comment-button" :data-comment="anime.comment">
-            Nota &nbsp; <img height="25px" src="@/assets/cursor.svg" alt="" />
-          </button>
-          <p v-if="showComment" class="show-comment">{{ anime.comment }}</p>
+
+        <div v-if="isEditing === i" class="edit-div-wrapper">
+          <div class="edit-div" v-if="!isLoading">
+            <img
+              @click="handleIsEditing(i)"
+              height="25px"
+              :src="cross"
+              alt="cross-icon" />
+          </div>
+          <div class="title-div">
+            <h2>{{ anime.title }}</h2>
+          </div>
+          <div class="add-episodes-div">
+            <img
+              height="30px"
+              src="@/assets/minus-blue.svg"
+              @click="
+                decrementEpisodeCount(
+                  singleAnimeData.value.attributes.episodeCount
+                )
+              "
+              alt="minus-svg" />
+            <span>{{ episodes }}</span>
+            <img
+              height="25px"
+              src="@/assets/plus-blue.svg"
+              @click="
+                incrementEpisodeCount(
+                  singleAnimeData.value.attributes.episodeCount
+                )
+              "
+              alt="plus-svg" />
+          </div>
+          <div v-if="isLoading" class="loader-wrapper">
+            <div class="loader"></div>
+          </div>
         </div>
       </div>
     </div>
@@ -52,6 +98,66 @@ const userId = ref(router.params.userId);
 const checkIfDataFetched = ref(false);
 const animeListData = ref(null);
 const showComment = ref(false);
+const isEditing = ref(null);
+const episodes = ref(0);
+const rating = ref("");
+const finished = ref(false);
+const starting_date = ref("");
+const ending_date = ref("");
+const plan_to_watch = ref(false);
+const comment = ref("");
+const animeID = ref(null);
+const isLoading = ref(false);
+
+const singleAnimeData = ref(null);
+
+const handleIsEditing = async (i, id) => {
+  if (isEditing.value === i) {
+    isEditing.value = null;
+    return;
+  }
+  isEditing.value = i;
+  animeID.value = animeListData.value[i].ID;
+  episodes.value = animeListData.value[i].episodes;
+  isLoading.value = true;
+  await findAnimeByID(id);
+  console.log(singleAnimeData.value);
+  isLoading.value = false;
+};
+
+const checkIfAnimeCompleted = (maxEp) => {
+  if (episodes.value > maxEp - 1 || episodes.value === "Completato") {
+    animeCompleted.value = true;
+    if (data.value[isAdding.value].attributes.episodes === 1) {
+      episodes.value = 1;
+    }
+    return;
+  }
+  animeCompleted.value = false;
+};
+const incrementEpisodeCount = (maxEp) => {
+  if (episodes.value >= maxEp - 1 || episodes.value === "Completato") {
+    episodes.value = "Completato";
+    checkIfAnimeCompleted(maxEp);
+    return;
+  }
+  checkIfAnimeCompleted(maxEp);
+  episodes.value++;
+};
+const decrementEpisodeCount = (maxEp) => {
+  if (episodes.value <= 0) {
+    episodes.value = 0;
+    checkIfAnimeCompleted(maxEp);
+    return;
+  }
+  if (episodes.value === "Completato") {
+    episodes.value = maxEp - 1;
+    checkIfAnimeCompleted(maxEp);
+    return;
+  }
+  episodes.value--;
+  checkIfAnimeCompleted(maxEp);
+};
 
 const getAnimeList = async () => {
   try {
@@ -74,7 +180,17 @@ const getAnimeList = async () => {
 const updateAnimeCard = () => {
   try {
     const res = axios.put(
-      `https://anime-vue-go-client-production.up.railway.app/update/anime/${animeListData.value.ID}`
+      `https://anime-vue-go-client-production.up.railway.app/update/anime/${animeID.value}`,
+      {
+        title: title.value,
+        episodes: episodes.value,
+        rating: rating.value,
+        finished: finished.value,
+        starting_date: starting_date.value,
+        ending_date: ending_date.value,
+        plan_to_watch: plan_to_watch.value,
+        comment: comment.value,
+      }
     );
   } catch (error) {
     console.error(error);
@@ -84,7 +200,7 @@ const updateAnimeCard = () => {
 const deleteAnimeCard = () => {
   try {
     const res = axios.delete(
-      `https://anime-vue-go-client-production.up.railway.app/delete/anime/${animeListData.value.ID}`
+      `https://anime-vue-go-client-production.up.railway.app/delete/anime/${animeID.value}`
     );
   } catch (error) {
     console.error(error);
@@ -97,6 +213,17 @@ onBeforeMount(() => {
     getAnimeList();
   }
 });
+
+const findAnimeByID = async (id) => {
+  try {
+    const res = await axios.get(
+      `https://kitsu.io/api/edge/anime?filter[id]=${id}&page[limit]=1`
+    );
+    singleAnimeData.value = res.data.data[0];
+  } catch (error) {
+    console.error(error);
+  }
+};
 </script>
 
 <style scoped>
@@ -133,6 +260,7 @@ h1 {
   border-radius: 25px;
   text-shadow: 2px 2px 2px rgba(0, 0, 0, 0.15);
   transition: transform 0.25s ease, background 0.8s ease, box-shadow 0.8s ease;
+  position: relative;
 }
 .anime-card:hover {
   transform: scale(1.02);
@@ -227,5 +355,91 @@ h1 {
 .comment-button:hover::after {
   opacity: 1;
   scale: 1;
+}
+.edit-div {
+  position: absolute;
+  top: 12px;
+  right: 15px;
+  cursor: pointer;
+}
+.anime-card-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.show-comment {
+  background: rgba(25, 61, 93, 0.75);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(8.5px);
+  -webkit-backdrop-filter: blur(8.5px);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  word-break: break-all;
+  padding: 20px;
+  font-weight: 600;
+  border-radius: 15px;
+}
+input {
+  margin: 5px;
+}
+button {
+  margin: 5px;
+}
+.edit-div-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.loader-wrapper {
+  height: 200px;
+  width: fit-content;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.add-episodes-div {
+  display: flex;
+  column-gap: 20px;
+  align-items: center;
+  justify-content: center;
+}
+.add-episodes-div input {
+  width: 55px;
+  height: 35px;
+  border-radius: 15px;
+  background-color: var(--green);
+  color: var(--dark-blue);
+  font-weight: 600;
+  text-align: center;
+  border: none;
+  margin-right: 3px;
+  user-select: none;
+}
+.add-episodes-div img {
+  cursor: pointer;
+}
+.add-episodes-div img:hover {
+  filter: brightness(0.9);
+}
+.add-episodes-div img:active {
+  filter: brightness(0.8);
+}
+.add-episodes-div input:focus {
+  outline: none;
+}
+.loader {
+  width: 50px;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: radial-gradient(farthest-side, #f03355 95%, #0000) 50% 1px/12px
+      12px no-repeat,
+    radial-gradient(farthest-side, #0000 calc(100% - 14px), #ccc 0);
+  animation: l9 2s infinite linear;
+}
+@keyframes l9 {
+  to {
+    transform: rotate(1turn);
+  }
 }
 </style>

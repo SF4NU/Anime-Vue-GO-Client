@@ -10,5 +10,6 @@ type AnimeList struct {
 	StartingDate string  `json:"starting_date"`
 	EndingDate   string  `json:"ending_date"`
 	Rating       float64 `json:"rating"`
+	AnimeID      int     `json:"anime_id"`
 	UserID       int     `json:"user_id"`
 }
