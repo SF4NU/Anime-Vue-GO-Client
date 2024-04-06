@@ -199,7 +199,7 @@
 </template>
 
 <script setup>
-import { ref, inject } from "vue";
+import { ref, inject, watch } from "vue";
 // const props = defineProps(["data", "isLoading"]);
 const data = inject("data");
 const isLoading = inject("isLoading");
@@ -386,6 +386,14 @@ const handleSubmitErrors = () => {
   isLoadingAdding.value = false;
   addingResponse.value = null;
 };
+watch(
+  () => data.value,
+  () => {
+    isAdding.value = null;
+    isLoadingAdding.value = false;
+    addingResponse.value = null;
+  }
+);
 </script>
 
 <style scoped>

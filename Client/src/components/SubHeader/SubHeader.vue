@@ -1,11 +1,20 @@
 <template>
   <header>
     <div class="search-div">
-      <input
-        @keypress.enter="getUserInput(userInput)"
-        v-model="userInput"
-        class="search-bar"
-        type="text" />
+      <div class="search-rel">
+        <input
+          @keypress.enter="getUserInput(userInput)"
+          v-model="userInput"
+          class="search-bar"
+          type="text" />
+        <img
+          @click="getUserInput(userInput)"
+          class="search-icon"
+          height="25px"
+          src="../../assets/search-svgrepo-com.svg"
+          alt="search-icon" />
+      </div>
+
       <button @click="getUserInput(userInput)">Cerca</button>
     </div>
     <div class="filter-div">
@@ -118,5 +127,14 @@ header {
   .search-div button {
     display: none;
   }
+}
+.search-icon {
+  position: absolute;
+  top: 4px;
+  right: 13px;
+  cursor: pointer;
+}
+.search-rel {
+  position: relative;
 }
 </style>
