@@ -91,7 +91,10 @@
         <div class="check-if-plan-to-watch">
           <div class="checkbox-wrapper-58">
             <label class="switch">
-              <input type="checkbox" v-model="checkIfPlanToWatch" />
+              <input
+                @click="setCountersToZero"
+                type="checkbox"
+                v-model="checkIfPlanToWatch" />
               <span class="slider"></span>
             </label>
           </div>

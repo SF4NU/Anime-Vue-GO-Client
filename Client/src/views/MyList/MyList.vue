@@ -12,7 +12,7 @@
             <span> Voto assegnato: {{ anime.rating }} </span>
           </div>
           <div class="completed-div">
-            <span>Completato: </span>
+            <span>Finito: </span>
             <img height="20px" :src="anime.finished ? check : cross" alt="" />
           </div>
           <div class="dates-div">
@@ -59,7 +59,10 @@
           <div class="check-if-plan-to-watch" v-if="!isLoading">
             <div class="checkbox-wrapper-58">
               <label class="switch">
-                <input type="checkbox" v-model="plan_to_watch" />
+                <input
+                  @click="setCountersToZero"
+                  type="checkbox"
+                  v-model="plan_to_watch" />
                 <span class="slider"></span>
               </label>
             </div>
@@ -122,20 +125,26 @@
               <span v-if="displayText">{{ lengthCounter }}/200</span>
             </div>
           </div>
-          <div class="date-div">
+          <div class="date-div" v-if="!isLoading">
             <h5>Data di inizio (opz.)</h5>
             <input
               type="date"
-              v-model="startingDate"
+              v-model="starting_date"
               min="2000-01-01"
               max="2025-12-31" />
             <h5 v-if="finished">Data di fine (opz.)</h5>
             <input
               v-if="finished"
               type="date"
-              v-model="endingDate"
+              v-model="ending_date"
               min="2000-01-01"
               max="2025-12-31" />
+          </div>
+          <div class="submit-anime-div" v-if="!isLoading">
+            <button @click="updateAnimeCard">Modifica</button>
+          </div>
+          <div class="remove-anime-div" data-remove="Rimuovi dalla lista">
+            <img height="30px" src="@/assets/bin.svg" alt="" />
           </div>
           <div v-if="isLoading" class="loader-wrapper">
             <div class="loader"></div>
@@ -176,7 +185,7 @@ const singleAnimeData = ref(null);
 
 const setCountersToZero = () => {
   episodes.value = 0;
-  rating.value = "";
+  rating.value = 1;
   finished.value = false;
   starting_date.value = "";
   ending_date.value = "";
@@ -193,6 +202,10 @@ const updateLengthCounter = () => {
   lengthCounter.value = textAreaLength.value.length;
 };
 
+const unreverseDate = (date) => {
+  return date.split("-").reverse().join("-");
+};
+
 const handleIsEditing = async (i, id) => {
   if (isEditing.value === i) {
     isEditing.value = null;
@@ -206,15 +219,21 @@ const handleIsEditing = async (i, id) => {
   rating.value = animeListData.value[i].rating;
   textAreaLength.value = animeListData.value[i].comment;
   lengthCounter.value = animeListData.value[i].comment.length;
+  starting_date.value = unreverseDate(animeListData.value[i].starting_date);
+  ending_date.value = unreverseDate(animeListData.value[i].ending_date);
+  plan_to_watch.value = animeListData.value[i].plan_to_watch;
   isLoading.value = true;
   await findAnimeByID(id);
-  console.log(singleAnimeData.value);
+  checkIfAnimeCompleted(singleAnimeData.value.attributes.episodeCount);
   isLoading.value = false;
 };
 
 const checkIfAnimeCompleted = (maxEp) => {
-  if (episodes.value > maxEp - 1 || episodes.value === "Completato") {
+  if (episodes.value > maxEp - 1 || episodes.value === "Finito") {
     finished.value = true;
+    if (episodes.value !== "Finito") {
+      episodes.value = "Finito";
+    }
     if (singleAnimeData.value.attributes.episodeCount === 1) {
       episodes.value = 1;
     }
@@ -223,8 +242,8 @@ const checkIfAnimeCompleted = (maxEp) => {
   finished.value = false;
 };
 const incrementEpisodeCount = (maxEp) => {
-  if (episodes.value >= maxEp - 1 || episodes.value === "Completato") {
-    episodes.value = "Completato";
+  if (episodes.value >= maxEp - 1 || episodes.value === "Finito") {
+    episodes.value = "Finito";
     checkIfAnimeCompleted(maxEp);
     return;
   }
@@ -237,7 +256,7 @@ const decrementEpisodeCount = (maxEp) => {
     checkIfAnimeCompleted(maxEp);
     return;
   }
-  if (episodes.value === "Completato") {
+  if (episodes.value === "Finito") {
     episodes.value = maxEp - 1;
     checkIfAnimeCompleted(maxEp);
     return;
@@ -264,21 +283,34 @@ const getAnimeList = async () => {
   }
 };
 
+const reverseDate = (date) => {
+  return date.split("-").reverse().join("-");
+};
+
 const updateAnimeCard = () => {
   try {
+    isLoading.value = true;
     const res = axios.put(
       `https://anime-vue-go-client-production.up.railway.app/update/anime/${animeID.value}`,
       {
-        title: title.value,
         episodes: episodes.value,
         rating: rating.value,
         finished: finished.value,
-        starting_date: starting_date.value,
-        ending_date: ending_date.value,
+        starting_date:
+          starting_date.value !== "" ? reverseDate(starting_date.value) : "",
+        ending_date:
+          ending_date.value !== "" ? reverseDate(ending_date.value) : "",
         plan_to_watch: plan_to_watch.value,
         comment: comment.value,
+      },
+      {
+        withCredentials: true,
       }
     );
+    isLoading.value = false;
+    console.log(res);
+    getAnimeList();
+    isEditing.value = null;
   } catch (error) {
     console.error(error);
   }
@@ -341,7 +373,7 @@ h1 {
   border: 1px solid black;
   margin: 10px;
   padding: 20px;
-  background: linear-gradient(145deg, #3c997d, #48b695);
+  background: linear-gradient(145deg, #67ebc3, #28886b);
   box-shadow: 9px 9px 18px #41a587, -9px -9px 18px #45af8f;
   border: 1px solid rgba(255, 255, 255, 0.18);
   border-radius: 25px;
@@ -448,6 +480,11 @@ h1 {
   top: 12px;
   right: 15px;
   cursor: pointer;
+  transition: filter 0.25s ease, scale 0.2s ease;
+}
+.edit-div:hover {
+  filter: brightness(1.2);
+  scale: 1.2;
 }
 .anime-card-wrap {
   display: flex;
@@ -506,11 +543,14 @@ button {
 }
 .add-values-div img {
   cursor: pointer;
+  transition: filter 0.25s ease, scale 0.2s ease;
 }
 .add-values-div img:hover {
+  scale: 1.2;
   filter: brightness(0.9);
 }
 .add-values-div img:active {
+  scale: 0.95;
   filter: brightness(0.8);
 }
 .add-values-div input:focus {
@@ -545,13 +585,14 @@ button {
 }
 .edit-comment-div button {
   background-color: var(--dark-blue);
-  color: var(--green);
+  color: #67ebc3;
   font-weight: 600;
   padding: 5px 10px;
   border-radius: 15px;
   cursor: pointer;
   margin-bottom: 10px;
   border: none;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.15);
 }
 .edit-comment-div button:hover {
   filter: brightness(0.9);
@@ -599,6 +640,91 @@ button {
   font-size: 0.6rem;
   opacity: 0.8;
 }
+.date-div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+}
+.date-div input {
+  width: 150px;
+  padding-right: 10px;
+  height: 35px;
+  border-radius: 15px;
+  background-color: var(--dark-blue);
+  color: #67ebc3;
+  font-weight: 600;
+  text-align: center;
+  border: none;
+  margin-bottom: 10px;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.15);
+}
+.date-div input:focus {
+  outline: none;
+}
+.date-div h5 {
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+.submit-anime-div {
+  margin-top: 10px;
+  margin-bottom: 25px;
+}
+.submit-anime-div button {
+  background-color: var(--dark-blue);
+  color: var(--yellow);
+  font-weight: 600;
+  padding: 10px 15px;
+  border-radius: 15px;
+  cursor: pointer;
+  border: none;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.15);
+}
+.submit-anime-div button:hover {
+  filter: brightness(0.9);
+}
+.submit-anime-div button:active {
+  filter: brightness(0.8);
+}
+.remove-anime-div {
+  position: absolute;
+  bottom: 12px;
+  right: 15px;
+  cursor: pointer;
+  transition: filter 0.25s ease, scale 0.2s ease;
+}
+.remove-anime-div::after {
+  content: attr(data-remove);
+  height: 30px;
+  width: 150px;
+  position: absolute;
+  top: 35px;
+  right: -65px;
+  background: rgba(25, 61, 93, 0.8);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(8.5px);
+  -webkit-backdrop-filter: blur(8.5px);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  word-break: break-all;
+  padding: 5px;
+  font-weight: 600;
+  text-align: center;
+  color: #67ebc3;
+  transition: opacity 0.25s ease, scale 0.2s ease;
+  opacity: 0;
+  scale: 0;
+}
+.remove-anime-div:hover::after {
+  opacity: 1;
+  scale: 1;
+}
+.remove-anime-div:hover {
+  filter: brightness(1.1);
+  scale: 1.1;
+}
+
 .loader {
   width: 50px;
   aspect-ratio: 1;
@@ -631,7 +757,7 @@ button {
   --thumb_color: #e8e8e8;
   --track_color: #e8e8e8;
   --track_active_color: #888;
-  --outline_color: #ac3d01;
+  --outline_color: var(--dark-blue);
   font-size: 17px;
   position: relative;
   display: inline-block;
