@@ -60,8 +60,6 @@ const logout = async () => {
       }
     );
     if (res.status >= 200 && res.status <= 209) {
-      console.log(document.cookie);
-      Cookies.remove("jwt");
       await changeLoggedStatus(false);
       await router.push("/login");
     }

@@ -100,7 +100,7 @@ func LoginUser(c *fiber.Ctx) error {
 		Name:     "jwt",
 		Value:    signedToken,
 		Expires:  time.Now().Add(time.Hour * 24),
-		HTTPOnly: false,
+		HTTPOnly: true,
 		Secure:   true, //IN HTTPS DEVE ESSERE TRUE, IN QUESTO CASO è FALSE PERCHE' STIAMO USANDO HTTP
 		SameSite: "None",
 	})
@@ -228,6 +228,8 @@ func Logout(c *fiber.Ctx) error {
 		Name:     "jwt",
 		Value:    "",
 		HTTPOnly: true,
+		Secure:   true,
+		SameSite: "None",
 		MaxAge:   -1,
 	})
 
