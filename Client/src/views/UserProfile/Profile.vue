@@ -55,6 +55,7 @@ const logout = async () => {
   try {
     const res = await axios.post(
       "https://anime-vue-go-client-production.up.railway.app/logout",
+      {},
       {
         withCredentials: true,
       }
