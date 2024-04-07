@@ -31,6 +31,7 @@ func main() {
 	app.Post("/login", handlers.LoginUser)
 	app.Get("/validate", middleware.Auth, handlers.Validate)
 	app.Post("/add/anime/:userID", middleware.Auth, handlers.AddAnime)
+	app.Post("/add/manga/:id", middleware.Auth, handlers.AddManga)
 	app.Post("logout", handlers.Logout)
 	app.Delete("/delete/anime/:id", middleware.Auth, handlers.DeleteAnime)
 	app.Put("/update/anime/:id", handlers.UpdateAnime)
