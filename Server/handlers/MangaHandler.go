@@ -46,3 +46,54 @@ func AddManga(c *fiber.Ctx) error {
 
 	return c.JSON(manga)
 }
+
+func UpdateManga(c *fiber.Ctx) error {
+	var manga models.MangaList
+
+	id := c.Params("id")
+
+	if err := initializers.DB.First(&manga, id).Error; err != nil {
+		c.Status(fiber.StatusNotFound).SendString("Manga not found")
+		return err
+	}
+
+	var updatedManga models.MangaList
+
+	if err := c.BodyParser(&updatedManga); err != nil {
+		c.Status(fiber.StatusBadRequest).SendString("Bad request")
+		return err
+	}
+
+	if updatedManga.Chapters != manga.Chapters {
+		manga.Chapters = updatedManga.Chapters
+	}
+	if updatedManga.Finished != manga.Finished {
+		manga.Finished = updatedManga.Finished
+	}
+	if updatedManga.Rating != manga.Rating {
+		manga.Rating = updatedManga.Rating
+	}
+	if updatedManga.Comment != manga.Comment {
+		manga.Comment = updatedManga.Comment
+	}
+	if updatedManga.StartingDate != manga.StartingDate {
+		manga.StartingDate = updatedManga.StartingDate
+	}
+	if updatedManga.EndingDate != manga.EndingDate {
+		manga.EndingDate = updatedManga.EndingDate
+	}
+	if updatedManga.PlanToRead != manga.PlanToRead {
+		manga.PlanToRead = updatedManga.PlanToRead
+	}
+
+	if err := initializers.DB.Save(&updatedManga).Error; err != nil {
+		c.Status(fiber.StatusInternalServerError).SendString("There was a problem with the server")
+		return err
+	}
+
+	return c.JSON(&updatedManga)
+}
+
+// func DeleteManga(c *fiber.Ctx) error {
+
+// }
