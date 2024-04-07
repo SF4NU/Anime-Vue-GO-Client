@@ -309,6 +309,7 @@ const reverseDate = (date) => {
 };
 
 const userId = inject("userId");
+
 const submitAnime = async () => {
   try {
     isLoadingAdding.value = true;
@@ -387,7 +388,7 @@ const handleSubmitErrors = () => {
   addingResponse.value = null;
 };
 watch(
-  () => data.value,
+  () => manga.value,
   () => {
     isAdding.value = null;
     isLoadingAdding.value = false;

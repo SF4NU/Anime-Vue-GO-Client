@@ -2,7 +2,7 @@
   <SubHeader />
   <div class="main-anime-card-div">
     <div v-for="(manga, i) in dataManga" :key="i" class="main-anime-display">
-      <div v-if="!isLoading" class="poster-div">
+      <div v-if="!isLoading && isAdding !== i" class="poster-div">
         <router-link
           :to="{ name: 'MangaInfo', params: { id: i } }"
           class="router-link">
@@ -13,7 +13,7 @@
         </router-link>
       </div>
       <div v-else-if="isLoading" class="loader"></div>
-      <div class="card-details">
+      <div class="card-details" v-if="isAdding !== i">
         <div>
           <router-link
             :to="{ name: 'MangaInfo', params: { id: i } }"
@@ -43,7 +43,7 @@
           </span>
         </div>
       </div>
-      <div class="rating-div">
+      <div class="rating-div" v-if="isAdding !== i">
         <img
           height="25px"
           src="../../assets/star-circle-svgrepo-com.svg"
@@ -51,6 +51,119 @@
         <span>
           {{ ratingConverter(manga.attributes.averageRating) }}
         </span>
+      </div>
+      <div
+        :class="isAdding !== i ? 'add-to-list' : 'add-to-list-close'"
+        data-tooltip="Aggiungi alla tua lista">
+        <img
+          height="35px"
+          :src="isAdding !== i ? plus : close"
+          alt="add-to-list"
+          @click="isAddingAnime(i)"
+          id="add-to-list-button"
+          v-if="!isLoading" />
+      </div>
+      <div
+        class="add-to-list-expanded-div"
+        v-if="isAdding === i && !isLoadingAdding">
+        <h3>
+          Aggiungi: &nbsp;
+          {{
+            manga.attributes.canonicalTitle.length > 20 &&
+            manga.attributes.abbreviatedTitles.length > 0
+              ? compareLengths(manga.attributes.abbreviatedTitles)
+              : cutString(manga.attributes.canonicalTitle)
+          }}
+          alla tua lista
+        </h3>
+        <div class="check-if-plan-to-watch">
+          <div class="checkbox-wrapper-58">
+            <label class="switch">
+              <input
+                @click="setCountersToZero"
+                type="checkbox"
+                v-model="checkIfPlanToWatch" />
+              <span class="slider"></span>
+            </label>
+          </div>
+          <h4>manga da leggere</h4>
+        </div>
+        <h4
+          v-if="
+            !checkIfPlanToWatch &&
+            manga.attributes.episodeCount !== null &&
+            manga.attributes.episodeCount !== 1
+          ">
+          Numero di capitoli letti
+        </h4>
+        <div
+          v-if="
+            !checkIfPlanToWatch &&
+            manga.attributes.episodeCount !== null &&
+            manga.attributes.episodeCount !== 1
+          "
+          class="add-episodes-div">
+          <img
+            height="42px"
+            src="@/assets/minus.svg"
+            @click="decrementEpisodeCount(manga.attributes.episodeCount)"
+            alt="minus-svg" />
+          <span>{{ episodeCount }}</span>
+          <img
+            height="35px"
+            src="@/assets/plus.svg"
+            @click="incrementEpisodeCount(manga.attributes.episodeCount)"
+            alt="plus-svg" />
+        </div>
+        <h4 v-if="!checkIfPlanToWatch">Voto</h4>
+        <div v-if="!checkIfPlanToWatch" class="add-episodes-div">
+          <img
+            height="42px"
+            src="@/assets/minus.svg"
+            @click="decrementUserRating"
+            alt="minus-svg" />
+          <span>{{ userRating }}</span>
+          <img
+            height="35px"
+            src="@/assets/plus.svg"
+            @click="incrementUserRating"
+            alt="plus-svg" />
+        </div>
+        <div class="comment-div">
+          <button @click="displayTextArea">Nota</button>
+          <div class="text-area-div">
+            <textarea
+              @input="updateLengthCounter"
+              v-if="displayText"
+              maxlength="200"
+              v-model="textAreaLength"
+              name="comment"
+              id="comment"
+              cols="20"
+              rows="5"
+              placeholder="Questo manga mi è piaciuto/non mi è piaciuto perché...">
+            </textarea>
+            <span v-if="displayText">{{ lengthCounter }}/200</span>
+          </div>
+        </div>
+        <div class="date-div">
+          <h5>Data di inizio (opz.)</h5>
+          <input
+            type="date"
+            v-model="startingDate"
+            min="2000-01-01"
+            max="2025-12-31" />
+          <h5 v-if="animeCompleted">Data di fine (opz.)</h5>
+          <input
+            v-if="animeCompleted"
+            type="date"
+            v-model="endingDate"
+            min="2000-01-01"
+            max="2025-12-31" />
+        </div>
+        <div class="submit-manga-div">
+          <button @click="submitManga">Aggiungi</button>
+        </div>
       </div>
     </div>
   </div>
@@ -65,6 +178,200 @@ import { compareLengths } from "../../utils/compareLengths";
 import { getYear } from "../../utils/getYear";
 import { ratingConverter } from "../../utils/ratingConverter";
 import SubHeader from "@/components/SubHeader/SubHeader.vue";
+import close from "@/assets/close.svg";
+import plus from "@/assets/plus.svg";
+import { cutString } from "../../utils/cutString";
+import { timeout } from "../../utils/timeout";
+import axios from "axios";
+
+const isLoadingAdding = ref(false);
+const checkIfPlanToWatch = ref(false);
+const textAreaLength = ref("");
+const lengthCounter = ref(0);
+const updateLengthCounter = () => {
+  lengthCounter.value = textAreaLength.value.length;
+};
+const isAdding = ref(null);
+const animeCompleted = ref(false);
+const addingResponse = ref(null);
+
+const isAddingAnime = (i) => {
+  //da modificare per i manga
+  if (isAdding.value === i) {
+    isAdding.value = null;
+    setCountersToZero();
+    return;
+  }
+  isAdding.value = i;
+  setCountersToZero();
+};
+const setCountersToZero = () => {
+  //da modificare per i manga
+  episodeCount.value = 0;
+  userRating.value = 1;
+  textAreaLength.value = "";
+  lengthCounter.value = 0;
+  displayText.value = false;
+  startingDate.value = "";
+  endingDate.value = "";
+  checkIfPlanToWatch.value = false;
+  animeCompleted.value = false;
+};
+const episodeCount = ref(0);
+const checkIfAnimeCompleted = (maxEp) => {
+  //da modificare per i manga
+  if (episodeCount.value > maxEp - 1 || episodeCount.value === "Completato") {
+    animeCompleted.value = true;
+    if (data.value[isAdding.value].attributes.episodeCount === 1) {
+      episodeCount.value = 1;
+    }
+    return;
+  }
+  animeCompleted.value = false;
+};
+const incrementEpisodeCount = (maxEp) => {
+  //da modificare per i manga
+  if (episodeCount.value >= maxEp - 1 || episodeCount.value === "Completato") {
+    episodeCount.value = "Completato";
+    checkIfAnimeCompleted(maxEp);
+    return;
+  }
+  checkIfAnimeCompleted(maxEp);
+  episodeCount.value++;
+};
+const decrementEpisodeCount = (maxEp) => {
+  //da modificare per i manga
+  if (episodeCount.value <= 0) {
+    episodeCount.value = 0;
+    checkIfAnimeCompleted(maxEp);
+    return;
+  }
+  if (episodeCount.value === "Completato") {
+    episodeCount.value = maxEp - 1;
+    checkIfAnimeCompleted(maxEp);
+    return;
+  }
+  episodeCount.value--;
+  checkIfAnimeCompleted(maxEp);
+};
+
+const userRating = ref(1);
+
+const incrementUserRating = () => {
+  if (userRating.value >= 10) {
+    userRating.value = 10;
+    return;
+  }
+  userRating.value += 0.5;
+};
+const decrementUserRating = () => {
+  if (userRating.value <= 1) {
+    userRating.value = 1;
+    return;
+  }
+  userRating.value -= 0.5;
+};
+const displayText = ref(false);
+const displayTextArea = () => {
+  displayText.value = !displayText.value;
+};
+
+const startingDate = ref("");
+const endingDate = ref("");
+
+const reverseDate = (date) => {
+  return date.split("-").reverse().join("-");
+};
+
+const handleSubmitErrors = () => {
+  isAdding.value = null;
+  isLoadingAdding.value = false;
+  addingResponse.value = null;
+};
+
+const userId = inject("userId");
+
+const submitManga = async () => {
+  //da modificare per i manga
+  try {
+    isLoadingAdding.value = true;
+    if (checkIfPlanToWatch.value) {
+      const res = await axios.post(
+        `https://anime-vue-go-client-production.up.railway.app/add/anime/${userId.value}`,
+        {
+          title: data.value[isAdding.value].attributes.canonicalTitle,
+          finished: false,
+          episodes: 0,
+          rating: 0,
+          comment: "",
+          starting_date:
+            startingDate.value !== "" ? reverseDate(startingDate.value) : "",
+          ending_date: "",
+          plan_to_watch: true,
+          anime_id: parseInt(data.value[isAdding.value].id),
+        },
+        {
+          withCredentials: true,
+        }
+      );
+      if (res.status >= 200 && res.status <= 209) {
+        isAdding.value = null;
+        isLoadingAdding.value = false;
+      }
+      return;
+    } else {
+      const res = await axios.post(
+        `https://anime-vue-go-client-production.up.railway.app/add/anime/${userId.value}`,
+        {
+          title: data.value[isAdding.value].attributes.canonicalTitle,
+          finished: animeCompleted.value,
+          episodes:
+            episodeCount.value === "Completato"
+              ? data.value[isAdding.value].attributes.episodeCount
+              : episodeCount.value,
+          rating: userRating.value,
+          comment: textAreaLength.value,
+          starting_date: reverseDate(startingDate.value),
+          ending_date: reverseDate(endingDate.value),
+          plan_to_watch: false,
+          anime_id: parseInt(data.value[isAdding.value].id),
+        },
+        {
+          withCredentials: true,
+        }
+      );
+      if (res.status >= 200 && res.status <= 209) {
+        isAdding.value = null;
+        isLoadingAdding.value = false;
+      }
+    }
+  } catch (error) {
+    console.error(error);
+    if (error.response.status === 409) {
+      addingResponse.value = "manga già presente nella tua lista";
+      await timeout(2500);
+      handleSubmitErrors();
+    } else if (error.response.status === 400) {
+      addingResponse.value = "Errore, riprova più tardi";
+      await timeout(2500);
+      handleSubmitErrors();
+    } else if (error.response.status === 401) {
+      addingResponse.value =
+        "Devi essere registrato per aggiungere manga alla lista!";
+      await timeout(3000);
+      handleSubmitErrors();
+    }
+  }
+};
+
+watch(
+  () => dataManga.value,
+  () => {
+    isAdding.value = null;
+    isLoadingAdding.value = false;
+    addingResponse.value = null;
+  }
+);
 </script>
 
 <style scoped>
@@ -89,7 +396,8 @@ import SubHeader from "@/components/SubHeader/SubHeader.vue";
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 500px;
+    min-height: 500px;
+    height: fit-content;
   }
   .anime-poster {
     height: 250px;
@@ -244,5 +552,283 @@ import SubHeader from "@/components/SubHeader/SubHeader.vue";
   100% {
     transform: rotate(360deg);
   }
+}
+.add-to-list::before {
+  content: attr(data-tooltip);
+  position: absolute;
+  top: 45px;
+  left: -105px;
+  z-index: 20;
+  background-color: rgb(172, 172, 172);
+  padding: 5px;
+  border-radius: 10px;
+  opacity: 0;
+  pointer-events: none;
+  scale: 0;
+  transition: opacity 0.25s ease, scale 0.15s ease;
+}
+.add-to-list::before {
+  top: 45px;
+  left: -45px;
+}
+.add-to-list:hover::before {
+  opacity: 0.95;
+  scale: 1;
+}
+.add-to-list {
+  position: absolute;
+  bottom: 12px;
+  right: 180px;
+  cursor: pointer;
+  filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.15));
+  z-index: 100;
+}
+.add-to-list-close {
+  position: absolute;
+  top: 10px;
+  right: 12px;
+  cursor: pointer;
+  filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.15));
+  z-index: 100;
+}
+.add-to-list:hover,
+.add-to-list-close:hover {
+  filter: drop-shadow(5px 5px 5px rgba(0, 0, 0, 0.15)) brightness(0.9);
+}
+.add-to-list:active,
+.add-to-list-close:active {
+  scale: 1.03;
+}
+.add-to-list-expanded-div {
+  width: 85%;
+  height: 90%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  border-radius: 15px;
+  z-index: 20;
+  color: var(--yellow);
+  font-weight: 600;
+  line-height: 25px;
+  margin-right: auto;
+  margin-left: auto;
+}
+.add-to-list-expanded-div h4 {
+  margin-top: 10px;
+  margin-bottom: 15px;
+}
+.checkbox-wrapper-58 input[type="checkbox"] {
+  visibility: hidden;
+  display: none;
+}
+
+.checkbox-wrapper-58 *,
+.checkbox-wrapper-58 ::after,
+.checkbox-wrapper-58 ::before {
+  box-sizing: border-box;
+}
+
+.checkbox-wrapper-58 .switch {
+  --switch_width: 2em;
+  --switch_height: 1em;
+  --thumb_color: #e8e8e8;
+  --track_color: #e8e8e8;
+  --track_active_color: #888;
+  --outline_color: #ac3d01;
+  font-size: 17px;
+  position: relative;
+  display: inline-block;
+  width: var(--switch_width);
+  height: var(--switch_height);
+}
+
+.checkbox-wrapper-58 .slider {
+  box-sizing: border-box;
+  border: 2px solid var(--outline_color);
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--track_color);
+  transition: 0.15s;
+  border-radius: var(--switch_height);
+}
+
+.checkbox-wrapper-58 .slider:before {
+  box-sizing: border-box;
+  position: absolute;
+  content: "";
+  height: var(--switch_height);
+  width: var(--switch_height);
+  border: 2px solid var(--outline_color);
+  border-radius: 100%;
+  left: -2px;
+  bottom: -2px;
+  background-color: var(--thumb_color);
+  transform: translateY(-0.2em);
+  box-shadow: 0 0.2em 0 var(--outline_color);
+  transition: 0.15s;
+}
+
+.checkbox-wrapper-58 input:checked + .slider {
+  background-color: var(--track_active_color);
+}
+
+.checkbox-wrapper-58 input:focus-visible + .slider {
+  box-shadow: 0 0 0 2px var(--track_active_color);
+}
+
+.checkbox-wrapper-58 input:hover + .slider:before {
+  transform: translateY(-0.3em);
+  box-shadow: 0 0.3em 0 var(--outline_color);
+}
+
+.checkbox-wrapper-58 input:checked + .slider:before {
+  transform: translateX(calc(var(--switch_width) - var(--switch_height)))
+    translateY(-0.2em);
+}
+
+.checkbox-wrapper-58 input:hover:checked + .slider:before {
+  transform: translateX(calc(var(--switch_width) - var(--switch_height)))
+    translateY(-0.3em);
+  box-shadow: 0 0.3em 0 var(--outline_color);
+}
+.submit-manga-div {
+  margin-top: 10px;
+  margin-bottom: 25px;
+}
+.submit-manga-div button {
+  background-color: var(--green);
+  color: var(--dark-blue);
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 15px;
+  cursor: pointer;
+  border: none;
+}
+.submit-manga-div button:hover {
+  filter: brightness(0.9);
+}
+.submit-manga-div button:active {
+  filter: brightness(0.8);
+}
+.date-div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+}
+.date-div input {
+  width: 150px;
+  padding-right: 10px;
+  height: 35px;
+  border-radius: 15px;
+  background-color: var(--green);
+  color: var(--dark-blue);
+  font-weight: 600;
+  text-align: center;
+  border: none;
+  margin-bottom: 10px;
+}
+.date-div input:focus {
+  outline: none;
+}
+.date-div h5 {
+  margin-top: 15px;
+  margin-bottom: 5px;
+}
+.check-if-plan-to-watch {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 10px;
+}
+.check-if-plan-to-watch h4 {
+  margin-left: 10px;
+}
+.comment-div {
+  margin-top: 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.comment-div button {
+  background-color: var(--green);
+  color: var(--dark-blue);
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: 15px;
+  cursor: pointer;
+  margin-bottom: 10px;
+  border: none;
+}
+.comment-div button:hover {
+  filter: brightness(0.9);
+}
+.comment-div button:active {
+  filter: brightness(0.8);
+}
+.comment-div textarea {
+  width: 80%;
+  height: 100px;
+  border-radius: 15px;
+  background-color: var(--green);
+  color: var(--dark-blue);
+  font-weight: 600;
+  padding: 10px;
+  border: none;
+  resize: none;
+}
+.comment-div textarea:focus {
+  outline: none;
+}
+.text-area-div {
+  display: flex;
+  position: relative;
+  align-items: center;
+  justify-content: center;
+}
+.text-area-div span {
+  position: absolute;
+  bottom: 0;
+  right: 30px;
+  color: var(--yellow);
+  font-weight: 400;
+  font-size: 0.6rem;
+  opacity: 0.8;
+}
+.add-episodes-div {
+  display: flex;
+  column-gap: 20px;
+  align-items: center;
+  justify-content: center;
+}
+.add-episodes-div input {
+  width: 55px;
+  height: 35px;
+  border-radius: 15px;
+  background-color: var(--green);
+  color: var(--dark-blue);
+  font-weight: 600;
+  text-align: center;
+  border: none;
+  margin-right: 3px;
+  user-select: none;
+}
+.add-episodes-div img {
+  cursor: pointer;
+}
+.add-episodes-div img:hover {
+  filter: brightness(0.9);
+}
+.add-episodes-div img:active {
+  filter: brightness(0.8);
+}
+.add-episodes-div input:focus {
+  outline: none;
 }
 </style>
