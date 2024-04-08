@@ -189,7 +189,7 @@
       <div class="wrap-loader-error" v-if="isLoadingAdding && isAdding === i">
         <div class="loader2"></div>
         <div class="error-response-div">
-          <span>
+          <span :class="addingResponse === 'Aggiunto!' ? 'error-green' : ''">
             {{ addingResponse }}
           </span>
         </div>
@@ -333,8 +333,9 @@ const submitAnime = async () => {
         }
       );
       if (res.status >= 200 && res.status <= 209) {
-        isAdding.value = null;
-        isLoadingAdding.value = false;
+        addingResponse.value = "Aggiunto!";
+        await timeout(1500);
+        handleSubmitErrors();
       }
       return;
     } else {
@@ -359,8 +360,9 @@ const submitAnime = async () => {
         }
       );
       if (res.status >= 200 && res.status <= 209) {
-        isAdding.value = null;
-        isLoadingAdding.value = false;
+        addingResponse.value = "Aggiunto!";
+        await timeout(1500);
+        handleSubmitErrors();
       }
     }
   } catch (error) {
@@ -376,6 +378,10 @@ const submitAnime = async () => {
     } else if (error.response.status === 401) {
       addingResponse.value =
         "Devi essere registrato per aggiungere anime alla lista!";
+      await timeout(3000);
+      handleSubmitErrors();
+    } else {
+      addingResponse.value = "C'è stato un errore, non si sa perché!";
       await timeout(3000);
       handleSubmitErrors();
     }
@@ -863,5 +869,8 @@ watch(
     width: 20px;
     margin-left: 60px;
   }
+}
+.error-green {
+  color: greenyellow;
 }
 </style>

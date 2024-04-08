@@ -15,7 +15,7 @@
       <div v-else-if="isLoading" class="wrap-loader-error">
         <div class="loader2"></div>
       </div>
-      <div class="card-details" v-if="isAdding !== i">
+      <div class="card-details" v-if="isAdding !== i && !isLoading">
         <div>
           <router-link
             :to="{ name: 'MangaInfo', params: { id: i } }"
@@ -45,7 +45,7 @@
           </span>
         </div>
       </div>
-      <div class="rating-div" v-if="isAdding !== i">
+      <div class="rating-div" v-if="isAdding !== i && !isLoading">
         <img
           height="25px"
           src="../../assets/star-circle-svgrepo-com.svg"
@@ -170,7 +170,7 @@
       <div class="wrap-loader-error" v-if="isLoadingAdding && isAdding === i">
         <div class="loader2"></div>
         <div class="error-response-div">
-          <span>
+          <span :class="addingResponse === 'Aggiunto!' ? 'error-green' : ''">
             {{ addingResponse }}
           </span>
         </div>
@@ -296,7 +296,6 @@ const handleSubmitErrors = () => {
 const userId = inject("userId");
 
 const submitManga = async () => {
-  //da modificare per i manga
   try {
     isLoadingAdding.value = true;
     if (checkIfPlanToRead.value) {
@@ -311,7 +310,7 @@ const submitManga = async () => {
           starting_date:
             startingDate.value !== "" ? reverseDate(startingDate.value) : "",
           ending_date: "",
-          plan_to_watch: true,
+          plan_to_read: true,
           manga_id: parseInt(dataManga.value[isAdding.value].id),
         },
         {
@@ -319,8 +318,9 @@ const submitManga = async () => {
         }
       );
       if (res.status >= 200 && res.status <= 209) {
-        isAdding.value = null;
-        isLoadingAdding.value = false;
+        addingResponse.value = "Aggiunto!";
+        await timeout(1500);
+        handleSubmitErrors();
       }
       return;
     } else {
@@ -337,7 +337,7 @@ const submitManga = async () => {
           comment: textAreaLength.value,
           starting_date: reverseDate(startingDate.value),
           ending_date: reverseDate(endingDate.value),
-          plan_to_watch: false,
+          plan_to_read: false,
           manga_id: parseInt(dataManga.value[isAdding.value].id),
         },
         {
@@ -345,8 +345,9 @@ const submitManga = async () => {
         }
       );
       if (res.status >= 200 && res.status <= 209) {
-        isAdding.value = null;
-        isLoadingAdding.value = false;
+        addingResponse.value = "Aggiunto!";
+        await timeout(1500);
+        handleSubmitErrors();
       }
     }
   } catch (error) {
@@ -362,6 +363,10 @@ const submitManga = async () => {
     } else if (error.response.status === 401) {
       addingResponse.value =
         "Devi essere registrato per aggiungere manga alla lista!";
+      await timeout(3000);
+      handleSubmitErrors();
+    } else {
+      addingResponse.value = "C'è stato un errore, non si sa perché!";
       await timeout(3000);
       handleSubmitErrors();
     }
@@ -879,5 +884,8 @@ watch(
   align-items: center;
   justify-content: center;
   width: 100%;
+}
+.error-green {
+  color: greenyellow;
 }
 </style>
