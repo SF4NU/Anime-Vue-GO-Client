@@ -86,14 +86,41 @@ func UpdateManga(c *fiber.Ctx) error {
 		manga.PlanToRead = updatedManga.PlanToRead
 	}
 
-	if err := initializers.DB.Save(&updatedManga).Error; err != nil {
+	if err := initializers.DB.Save(&manga).Error; err != nil {
 		c.Status(fiber.StatusInternalServerError).SendString("There was a problem with the server")
 		return err
 	}
 
-	return c.JSON(&updatedManga)
+	return c.JSON(&manga)
 }
 
-// func DeleteManga(c *fiber.Ctx) error {
+func DeleteManga(c *fiber.Ctx) error {
+	id := c.Params("id")
 
-// }
+	var manga models.MangaList
+
+	if err := initializers.DB.First(&manga, id).Error; err != nil {
+		c.Status(fiber.StatusNotFound).SendString("Manga doesn't exist in list")
+		return err
+	}
+
+	if err := initializers.DB.Delete(&manga).Error; err != nil {
+		c.Status(fiber.StatusInternalServerError).SendString("There was a problem with the server")
+		return err
+	}
+
+	return c.SendStatus(fiber.StatusAccepted)
+}
+
+func GetManga(c *fiber.Ctx) error {
+	id := c.Params("id") //id dello user a cui appartiene la lista
+
+	var manga []models.MangaList
+
+	if err := initializers.DB.Where("user_id = ?", id).Find(&manga).Error; err != nil {
+		c.Status(fiber.StatusNotFound).SendString("No manga found for this user")
+		return err
+	}
+
+	return c.JSON(manga)
+}
