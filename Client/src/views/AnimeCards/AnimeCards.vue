@@ -388,7 +388,7 @@ const handleSubmitErrors = () => {
   addingResponse.value = null;
 };
 watch(
-  () => manga.value,
+  () => data.value,
   () => {
     isAdding.value = null;
     isLoadingAdding.value = false;

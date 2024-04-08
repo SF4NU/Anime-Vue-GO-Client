@@ -12,7 +12,9 @@
             :alt="manga.attributes.canonicalTitle + ' poster'" />
         </router-link>
       </div>
-      <div v-else-if="isLoading" class="loader"></div>
+      <div v-else-if="isLoading" class="wrap-loader-error">
+        <div class="loader2"></div>
+      </div>
       <div class="card-details" v-if="isAdding !== i">
         <div>
           <router-link
@@ -59,7 +61,7 @@
           height="35px"
           :src="isAdding !== i ? plus : close"
           alt="add-to-list"
-          @click="isAddingAnime(i)"
+          @click="isAddingManga(i)"
           id="add-to-list-button"
           v-if="!isLoading" />
       </div>
@@ -82,7 +84,7 @@
               <input
                 @click="setCountersToZero"
                 type="checkbox"
-                v-model="checkIfPlanToWatch" />
+                v-model="checkIfPlanToRead" />
               <span class="slider"></span>
             </label>
           </div>
@@ -90,33 +92,33 @@
         </div>
         <h4
           v-if="
-            !checkIfPlanToWatch &&
-            manga.attributes.episodeCount !== null &&
-            manga.attributes.episodeCount !== 1
+            !checkIfPlanToRead &&
+            manga.attributes.chapterCount !== null &&
+            manga.attributes.chapterCount !== 1
           ">
           Numero di capitoli letti
         </h4>
         <div
           v-if="
-            !checkIfPlanToWatch &&
-            manga.attributes.episodeCount !== null &&
-            manga.attributes.episodeCount !== 1
+            !checkIfPlanToRead &&
+            manga.attributes.chapterCount !== null &&
+            manga.attributes.chapterCount !== 1
           "
           class="add-episodes-div">
           <img
             height="42px"
             src="@/assets/minus.svg"
-            @click="decrementEpisodeCount(manga.attributes.episodeCount)"
+            @click="decrementChapterCount(manga.attributes.chapterCount)"
             alt="minus-svg" />
-          <span>{{ episodeCount }}</span>
+          <span>{{ chapterCount }}</span>
           <img
             height="35px"
             src="@/assets/plus.svg"
-            @click="incrementEpisodeCount(manga.attributes.episodeCount)"
+            @click="incrementChapterCount(manga.attributes.chapterCount)"
             alt="plus-svg" />
         </div>
-        <h4 v-if="!checkIfPlanToWatch">Voto</h4>
-        <div v-if="!checkIfPlanToWatch" class="add-episodes-div">
+        <h4 v-if="!checkIfPlanToRead">Voto</h4>
+        <div v-if="!checkIfPlanToRead" class="add-episodes-div">
           <img
             height="42px"
             src="@/assets/minus.svg"
@@ -153,9 +155,9 @@
             v-model="startingDate"
             min="2000-01-01"
             max="2025-12-31" />
-          <h5 v-if="animeCompleted">Data di fine (opz.)</h5>
+          <h5 v-if="mangaCompleted">Data di fine (opz.)</h5>
           <input
-            v-if="animeCompleted"
+            v-if="mangaCompleted"
             type="date"
             v-model="endingDate"
             min="2000-01-01"
@@ -165,13 +167,20 @@
           <button @click="submitManga">Aggiungi</button>
         </div>
       </div>
+      <div class="wrap-loader-error" v-if="isLoadingAdding && isAdding === i">
+        <div class="loader2"></div>
+        <div class="error-response-div">
+          <span>
+            {{ addingResponse }}
+          </span>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
 import { inject, ref, watch } from "vue";
-// const props = defineProps(["dataManga", "isLoading"]);
 const dataManga = inject("dataManga");
 const isLoading = inject("isLoading");
 import { compareLengths } from "../../utils/compareLengths";
@@ -185,18 +194,17 @@ import { timeout } from "../../utils/timeout";
 import axios from "axios";
 
 const isLoadingAdding = ref(false);
-const checkIfPlanToWatch = ref(false);
+const checkIfPlanToRead = ref(false);
 const textAreaLength = ref("");
 const lengthCounter = ref(0);
 const updateLengthCounter = () => {
   lengthCounter.value = textAreaLength.value.length;
 };
 const isAdding = ref(null);
-const animeCompleted = ref(false);
+const mangaCompleted = ref(false);
 const addingResponse = ref(null);
 
-const isAddingAnime = (i) => {
-  //da modificare per i manga
+const isAddingManga = (i) => {
   if (isAdding.value === i) {
     isAdding.value = null;
     setCountersToZero();
@@ -206,53 +214,49 @@ const isAddingAnime = (i) => {
   setCountersToZero();
 };
 const setCountersToZero = () => {
-  //da modificare per i manga
-  episodeCount.value = 0;
+  chapterCount.value = 0;
   userRating.value = 1;
   textAreaLength.value = "";
   lengthCounter.value = 0;
   displayText.value = false;
   startingDate.value = "";
   endingDate.value = "";
-  checkIfPlanToWatch.value = false;
-  animeCompleted.value = false;
+  checkIfPlanToRead.value = false;
+  mangaCompleted.value = false;
 };
-const episodeCount = ref(0);
-const checkIfAnimeCompleted = (maxEp) => {
-  //da modificare per i manga
-  if (episodeCount.value > maxEp - 1 || episodeCount.value === "Completato") {
-    animeCompleted.value = true;
-    if (data.value[isAdding.value].attributes.episodeCount === 1) {
-      episodeCount.value = 1;
+const chapterCount = ref(0);
+const checkIfMangaCompleted = (maxEp) => {
+  if (chapterCount.value > maxEp - 1 || chapterCount.value === "Completato") {
+    mangaCompleted.value = true;
+    if (dataManga.value[isAdding.value].attributes.chapterCount === 1) {
+      chapterCount.value = 1;
     }
     return;
   }
-  animeCompleted.value = false;
+  mangaCompleted.value = false;
 };
-const incrementEpisodeCount = (maxEp) => {
-  //da modificare per i manga
-  if (episodeCount.value >= maxEp - 1 || episodeCount.value === "Completato") {
-    episodeCount.value = "Completato";
-    checkIfAnimeCompleted(maxEp);
+const incrementChapterCount = (maxEp) => {
+  if (chapterCount.value >= maxEp - 1 || chapterCount.value === "Completato") {
+    chapterCount.value = "Completato";
+    checkIfMangaCompleted(maxEp);
     return;
   }
-  checkIfAnimeCompleted(maxEp);
-  episodeCount.value++;
+  checkIfMangaCompleted(maxEp);
+  chapterCount.value++;
 };
-const decrementEpisodeCount = (maxEp) => {
-  //da modificare per i manga
-  if (episodeCount.value <= 0) {
-    episodeCount.value = 0;
-    checkIfAnimeCompleted(maxEp);
+const decrementChapterCount = (maxEp) => {
+  if (chapterCount.value <= 0) {
+    chapterCount.value = 0;
+    checkIfMangaCompleted(maxEp);
     return;
   }
-  if (episodeCount.value === "Completato") {
-    episodeCount.value = maxEp - 1;
-    checkIfAnimeCompleted(maxEp);
+  if (chapterCount.value === "Completato") {
+    chapterCount.value = maxEp - 1;
+    checkIfMangaCompleted(maxEp);
     return;
   }
-  episodeCount.value--;
-  checkIfAnimeCompleted(maxEp);
+  chapterCount.value--;
+  checkIfMangaCompleted(maxEp);
 };
 
 const userRating = ref(1);
@@ -295,20 +299,20 @@ const submitManga = async () => {
   //da modificare per i manga
   try {
     isLoadingAdding.value = true;
-    if (checkIfPlanToWatch.value) {
+    if (checkIfPlanToRead.value) {
       const res = await axios.post(
-        `https://anime-vue-go-client-production.up.railway.app/add/anime/${userId.value}`,
+        `https://anime-vue-go-client-production.up.railway.app/add/manga/${userId.value}`,
         {
-          title: data.value[isAdding.value].attributes.canonicalTitle,
+          title: dataManga.value[isAdding.value].attributes.canonicalTitle,
           finished: false,
-          episodes: 0,
+          chapters: 0,
           rating: 0,
           comment: "",
           starting_date:
             startingDate.value !== "" ? reverseDate(startingDate.value) : "",
           ending_date: "",
           plan_to_watch: true,
-          anime_id: parseInt(data.value[isAdding.value].id),
+          manga_id: parseInt(dataManga.value[isAdding.value].id),
         },
         {
           withCredentials: true,
@@ -321,20 +325,20 @@ const submitManga = async () => {
       return;
     } else {
       const res = await axios.post(
-        `https://anime-vue-go-client-production.up.railway.app/add/anime/${userId.value}`,
+        `https://anime-vue-go-client-production.up.railway.app/add/manga/${userId.value}`,
         {
-          title: data.value[isAdding.value].attributes.canonicalTitle,
-          finished: animeCompleted.value,
-          episodes:
-            episodeCount.value === "Completato"
-              ? data.value[isAdding.value].attributes.episodeCount
-              : episodeCount.value,
+          title: dataManga.value[isAdding.value].attributes.canonicalTitle,
+          finished: mangaCompleted.value,
+          chapters:
+            chapterCount.value === "Completato"
+              ? data.value[isAdding.value].attributes.chapterCount
+              : chapterCount.value,
           rating: userRating.value,
           comment: textAreaLength.value,
           starting_date: reverseDate(startingDate.value),
           ending_date: reverseDate(endingDate.value),
           plan_to_watch: false,
-          anime_id: parseInt(data.value[isAdding.value].id),
+          manga_id: parseInt(dataManga.value[isAdding.value].id),
         },
         {
           withCredentials: true,
@@ -348,7 +352,7 @@ const submitManga = async () => {
   } catch (error) {
     console.error(error);
     if (error.response.status === 409) {
-      addingResponse.value = "manga già presente nella tua lista";
+      addingResponse.value = "Manga già presente nella tua lista";
       await timeout(2500);
       handleSubmitErrors();
     } else if (error.response.status === 400) {
@@ -830,5 +834,50 @@ watch(
 }
 .add-episodes-div input:focus {
   outline: none;
+}
+.loader2 {
+  height: 35px;
+  width: 80px;
+  margin-left: 0px;
+  background: radial-gradient(farthest-side, #ffd1d1 94%, #0000) 4px 22px/5px
+      5px,
+    radial-gradient(farthest-side, #ffd1d1 94%, #0000) 12px 18px/5px 5px,
+    radial-gradient(farthest-side, #ffd1d1 94%, #0000) 3px 6px/8px 8px,
+    radial-gradient(farthest-side, #eb8594 90%, #0000 94%) left/20px 100%,
+    #bd3342;
+  background-repeat: no-repeat;
+  border-radius: 0 50px 50px 0;
+  border-top-left-radius: 30px 40px;
+  border-bottom-left-radius: 30px 40px;
+  animation: l7 2.5s infinite steps(10);
+  position: relative;
+}
+.loader::before {
+  content: " ";
+  position: absolute;
+  inset: calc(50% - 8px) -10px calc(50% - 8px) auto;
+  width: 15px;
+  background: #bd3342;
+  clip-path: polygon(0 50%, 100% 0, 70% 50%, 100% 100%);
+}
+@keyframes l7 {
+  100% {
+    width: 20px;
+    margin-left: 60px;
+  }
+}
+.error-response-div {
+  color: var(--red);
+  font-weight: 600;
+  margin-top: 10px;
+  text-align: center;
+  width: 80%;
+}
+.wrap-loader-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
 }
 </style>
