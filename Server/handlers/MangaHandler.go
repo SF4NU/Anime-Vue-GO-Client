@@ -34,7 +34,7 @@ func AddManga(c *fiber.Ctx) error {
 
 	var existingManga models.MangaList
 
-	if err := initializers.DB.Where("manga_id = ? AND user_id = ?", existingManga.MangaID, id).First(&existingManga).Error; err == nil {
+	if err := initializers.DB.Where("manga_id = ? AND user_id = ?", manga.MangaID, id).First(&existingManga).Error; err == nil {
 		c.Status(fiber.StatusConflict).SendString("Manga already in list")
 		return err
 	}
