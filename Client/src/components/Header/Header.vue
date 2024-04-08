@@ -17,7 +17,13 @@
         v-if="isLoggedIn"
         :to="{ name: 'MyList', params: { userId: userId } }"
         class="router-link"
-        >MyList</router-link
+        >Anime List</router-link
+      >
+      <router-link
+        v-if="isLoggedIn"
+        :to="{ name: 'MyMangaList', params: { userId: userId } }"
+        class="router-link"
+        >Manga List</router-link
       >
       <router-link
         v-if="isLoggedIn"
@@ -60,7 +66,14 @@
           :to="{ name: 'MyList', params: { userId: userId } }"
           class="router-link"
           @click="handleToggleHeader()"
-          >MyList</router-link
+          >Anime List</router-link
+        >
+        <router-link
+          v-if="isLoggedIn"
+          :to="{ name: 'MyMangaList', params: { userId: userId } }"
+          class="router-link"
+          @click="handleToggleHeader()"
+          >Manga List</router-link
         >
         <router-link
           v-if="isLoggedIn"

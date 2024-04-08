@@ -1,6 +1,6 @@
 <template>
   <section>
-    <h1>Anime List</h1>
+    <h1>Manga List</h1>
     <!-- <div class="search-div">
       <input
         v-model="animeTitle"
@@ -10,47 +10,47 @@
         :placeholder="placeholderText" />
     </div> -->
     <div class="anime-container">
-      <div v-for="(anime, i) in animeListData" :key="i" class="anime-card">
+      <div v-for="(manga, i) in mangaListData" :key="i" class="anime-card">
         <div
           class="anime-card-wrap"
-          v-if="isEditing !== i && anime.title !== searchedAnime">
-          <h2>{{ anime.title }}</h2>
+          v-if="isEditing !== i && manga.title !== searchedAnime">
+          <h2>{{ manga.title }}</h2>
           <div>
-            <span> Episodi guardati: {{ anime.episodes }} </span>
+            <span> Capitoli letti: {{ manga.chapters }} </span>
           </div>
-          <div v-if="!anime.plan_to_watch">
-            <span> Voto assegnato: {{ anime.rating }} </span>
+          <div v-if="!manga.plan_to_read">
+            <span> Voto assegnato: {{ manga.rating }} </span>
           </div>
           <div class="completed-div">
             <span>Finito: </span>
-            <img height="20px" :src="anime.finished ? check : cross" alt="" />
+            <img height="20px" :src="manga.finished ? check : cross" alt="" />
           </div>
           <div class="dates-div">
-            <span v-if="anime.starting_date !== ''">
-              Inizio: {{ anime.starting_date }} </span
+            <span v-if="manga.starting_date !== ''">
+              Inizio: {{ manga.starting_date }} </span
             ><br />
-            <span v-if="!anime.plan_to_watch && anime.finished">
-              Fine: {{ anime.ending_date }}
+            <span v-if="!manga.plan_to_watch && manga.finished">
+              Fine: {{ manga.ending_date }}
             </span>
           </div>
           <div
             class="plan-to-watch-div"
-            v-if="!anime.finished && anime.plan_to_watch">
-            <span> Da vedere ?</span>&nbsp;
+            v-if="!manga.finished && manga.plan_to_watch">
+            <span> Da leggere ?</span>&nbsp;
             <img
               height="20px"
-              :src="anime.plan_to_watch ? check : cross"
+              :src="manga.plan_to_watch ? check : cross"
               alt="" />
           </div>
-          <div class="comment-div" v-if="anime.comment !== ''">
-            <button class="comment-button" :data-comment="anime.comment">
+          <div class="comment-div" v-if="manga.comment !== ''">
+            <button class="comment-button" :data-comment="manga.comment">
               Nota &nbsp; <img height="25px" src="@/assets/cursor.svg" alt="" />
             </button>
-            <p v-if="showComment" class="show-comment">{{ anime.comment }}</p>
+            <p v-if="showComment" class="show-comment">{{ manga.comment }}</p>
           </div>
           <div class="edit-div">
             <img
-              @click="handleIsEditing(i, anime.anime_id)"
+              @click="handleIsEditing(i, manga.manga_id)"
               height="25px"
               src="@/assets/edit.svg"
               alt="" />
@@ -66,7 +66,7 @@
               alt="cross-icon" />
           </div>
           <div class="title-div">
-            <h2>{{ anime.title }}</h2>
+            <h2>{{ manga.title }}</h2>
           </div>
           <div class="check-if-plan-to-watch" v-if="!isLoading">
             <div class="checkbox-wrapper-58">
@@ -74,35 +74,35 @@
                 <input
                   @click="setCountersToZero"
                   type="checkbox"
-                  v-model="plan_to_watch" />
+                  v-model="plan_to_read" />
                 <span class="slider"></span>
               </label>
             </div>
-            <h4>Anime da vedere</h4>
+            <h4>Manga da leggere</h4>
           </div>
-          <div class="add-values-div" v-if="!plan_to_watch && !isLoading">
+          <div class="add-values-div" v-if="!plan_to_read && !isLoading">
             <div class="episodes-title-div">
-              <h4>Episodi guardati</h4>
+              <h4>Capitoli letti</h4>
             </div>
             <div class="add-episodes-div">
               <img
                 height="30px"
                 src="@/assets/minus-blue.svg"
                 @click="
-                  decrementEpisodeCount(singleAnimeData.attributes.episodeCount)
+                  decrementChapterCount(singleMangaData.attributes.chapterCount)
                 "
                 alt="minus-svg" />
-              <span>{{ episodes }}</span>
+              <span>{{ chapters }}</span>
               <img
                 height="25px"
                 src="@/assets/plus-blue.svg"
                 @click="
-                  incrementEpisodeCount(singleAnimeData.attributes.episodeCount)
+                  incrementChapterCount(singleMangaData.attributes.chapterCount)
                 "
                 alt="plus-svg" />
             </div>
           </div>
-          <div v-if="!plan_to_watch && !isLoading" class="add-values-div">
+          <div v-if="!plan_to_read && !isLoading" class="add-values-div">
             <div class="rating-title-div">
               <h4>Voto</h4>
             </div>
@@ -153,14 +153,14 @@
               max="2025-12-31" />
           </div>
           <div class="submit-anime-div" v-if="!isLoading">
-            <button @click="updateAnimeCard">Modifica</button>
+            <button @click="updateMangaCard">Modifica</button>
           </div>
           <div
             v-if="!isLoading"
             class="remove-anime-div"
             data-remove="Rimuovi dalla lista">
             <img
-              @click="deleteAnimeCard"
+              @click="deleteMangaCard"
               height="30px"
               src="@/assets/bin.svg"
               alt="" />
@@ -181,7 +181,7 @@
 </template>
 
 <script setup>
-import { onBeforeMount, onMounted, ref } from "vue";
+import { onBeforeMount, onMounted, ref, watch } from "vue";
 import { useRoute } from "vue-router";
 import axios from "axios";
 import check from "@/assets/check.svg";
@@ -191,16 +191,16 @@ import { timeout } from "../../utils/timeout";
 const router = useRoute();
 const userId = ref(router.params.userId);
 const checkIfDataFetched = ref(false);
-const animeListData = ref(null);
+const mangaListData = ref(null);
 const showComment = ref(false);
 const isEditing = ref(null);
-const episodes = ref(0);
+const chapters = ref(0);
 const rating = ref(1);
 const finished = ref(false);
 const starting_date = ref("");
 const ending_date = ref("");
-const plan_to_watch = ref(false);
-const animeID = ref(null);
+const plan_to_read = ref(false);
+const mangaID = ref(null);
 const isLoading = ref(false);
 const displayText = ref(false);
 const textAreaLength = ref("");
@@ -211,24 +211,23 @@ const placeholders = ref([]);
 const searchedAnime = ref("");
 const addingResponse = ref("");
 
-const singleAnimeData = ref(null);
+const singleMangaData = ref(null);
 
 // const handleSearch = () => {
-//   searchedAnime.value = animeListData.value.filter((anime) =>
+//   searchedAnime.value = mangaListData.value.filter((anime) =>
 //     anime.title.toLowerCase().includes(animeTitle.value.toLowerCase())
 //   );
 //   console.log(searchedAnime.value);
 // };
 
 const setCountersToZero = () => {
-  episodes.value = 0;
+  chapters.value = 0;
   rating.value = 1;
   finished.value = false;
   starting_date.value = "";
   ending_date.value = "";
-  plan_to_watch.value = false;
+  plan_to_read.value = false;
   textAreaLength.value = "";
-  plan_to_watch.value = false;
 };
 
 const displayTextArea = () => {
@@ -251,55 +250,55 @@ const handleIsEditing = async (i, id) => {
   }
   isEditing.value = i;
   setCountersToZero();
-  animeID.value = animeListData.value[i].ID;
-  episodes.value = animeListData.value[i].episodes;
-  rating.value = animeListData.value[i].rating;
-  textAreaLength.value = animeListData.value[i].comment;
-  lengthCounter.value = animeListData.value[i].comment.length;
-  starting_date.value = unreverseDate(animeListData.value[i].starting_date);
-  ending_date.value = unreverseDate(animeListData.value[i].ending_date);
-  plan_to_watch.value = animeListData.value[i].plan_to_watch;
+  mangaID.value = mangaListData.value[i].ID;
+  chapters.value = mangaListData.value[i].chapters;
+  rating.value = mangaListData.value[i].rating;
+  textAreaLength.value = mangaListData.value[i].comment;
+  lengthCounter.value = mangaListData.value[i].comment.length;
+  starting_date.value = unreverseDate(mangaListData.value[i].starting_date);
+  ending_date.value = unreverseDate(mangaListData.value[i].ending_date);
+  plan_to_read.value = mangaListData.value[i].plan_to_read;
   isLoading.value = true;
-  await findAnimeByID(id);
-  checkIfAnimeCompleted(singleAnimeData.value.attributes.episodeCount);
+  await findMangaByID(id);
+  checkIfMangaCompleted(singleMangaData.value.attributes.chapterCount);
   isLoading.value = false;
 };
 
-const checkIfAnimeCompleted = (maxEp) => {
-  if (episodes.value > maxEp - 1 || episodes.value === "Finito") {
+const checkIfMangaCompleted = (maxEp) => {
+  if (chapters.value > maxEp - 1 || chapters.value === "Finito") {
     finished.value = true;
-    if (episodes.value !== "Finito") {
-      episodes.value = "Finito";
+    if (chapters.value !== "Finito") {
+      chapters.value = "Finito";
     }
-    if (singleAnimeData.value.attributes.episodeCount === 1) {
-      episodes.value = 1;
+    if (singleMangaData.value.attributes.chapterCount === 1) {
+      chapters.value = 1;
     }
     return;
   }
   finished.value = false;
 };
-const incrementEpisodeCount = (maxEp) => {
-  if (episodes.value >= maxEp - 1 || episodes.value === "Finito") {
-    episodes.value = "Finito";
-    checkIfAnimeCompleted(maxEp);
+const incrementChapterCount = (maxEp) => {
+  if (chapters.value >= maxEp - 1 || chapters.value === "Finito") {
+    chapters.value = "Finito";
+    checkIfMangaCompleted(maxEp);
     return;
   }
-  checkIfAnimeCompleted(maxEp);
-  episodes.value++;
+  checkIfMangaCompleted(maxEp);
+  chapters.value++;
 };
-const decrementEpisodeCount = (maxEp) => {
-  if (episodes.value <= 0) {
-    episodes.value = 0;
-    checkIfAnimeCompleted(maxEp);
+const decrementChapterCount = (maxEp) => {
+  if (chapters.value <= 0) {
+    chapters.value = 0;
+    checkIfMangaCompleted(maxEp);
     return;
   }
-  if (episodes.value === "Finito") {
-    episodes.value = maxEp - 1;
-    checkIfAnimeCompleted(maxEp);
+  if (chapters.value === "Finito") {
+    chapters.value = maxEp - 1;
+    checkIfMangaCompleted(maxEp);
     return;
   }
-  episodes.value--;
-  checkIfAnimeCompleted(maxEp);
+  chapters.value--;
+  checkIfMangaCompleted(maxEp);
 };
 
 const incrementUserRating = () => {
@@ -318,19 +317,25 @@ const decrementUserRating = () => {
   rating.value -= 0.5;
 };
 
-const getAnimeList = async () => {
+const handleSubmitErrors = () => {
+  isEditing.value = null;
+  isLoading.value = false;
+  addingResponse.value = null;
+};
+
+const getMangaList = async () => {
   try {
     const res = await axios.get(
-      `https://anime-vue-go-client-production.up.railway.app/users/${userId.value}/anime`,
+      `https://anime-vue-go-client-production.up.railway.app/users/${userId.value}/manga`,
       {
         withCredentials: true,
       }
     );
     if (res.status >= 200 && res.status <= 209) {
-      animeListData.value = res.data.sort((a, b) =>
+      mangaListData.value = res.data.sort((a, b) =>
         a.title.localeCompare(b.title)
       );
-      placeholders.value = animeListData.value.map((anime) => anime.title);
+      // placeholders.value = mangaListData.value.map((anime) => anime.title);
       isEditing.value = null;
       isLoading.value = false;
     } else {
@@ -344,22 +349,16 @@ const reverseDate = (date) => {
   return date.split("-").reverse().join("-");
 };
 
-const handleSubmitErrors = () => {
-  isEditing.value = null;
-  isLoading.value = false;
-  addingResponse.value = null;
-};
-
-const updateAnimeCard = async () => {
+const updateMangaCard = async () => {
   try {
     isLoading.value = true;
     const res = await axios.put(
-      `https://anime-vue-go-client-production.up.railway.app/update/anime/${animeID.value}`,
+      `https://anime-vue-go-client-production.up.railway.app/update/manga/${mangaID.value}`,
       {
-        episodes:
-          episodes.value === "Finito"
-            ? singleAnimeData.value.attributes.episodeCount
-            : episodes.value,
+        chapters:
+          chapters.value === "Finito"
+            ? singleMangaData.value.attributes.chapterCount
+            : chapters.value,
         rating: rating.value,
         finished: finished.value,
         starting_date:
@@ -368,7 +367,7 @@ const updateAnimeCard = async () => {
           ending_date.value !== "" && finished.value
             ? reverseDate(ending_date.value)
             : "",
-        plan_to_watch: plan_to_watch.value,
+        plan_to_read: plan_to_read.value,
         comment: textAreaLength.value,
       },
       {
@@ -377,9 +376,9 @@ const updateAnimeCard = async () => {
     );
 
     if (res.status >= 200 && res.status <= 209) {
-      addingResponse.value = "Aggiunto!";
+      addingResponse.value = "Modificato!";
       await timeout(2000);
-      getAnimeList();
+      getMangaList();
       handleSubmitErrors();
     }
   } catch (error) {
@@ -396,17 +395,17 @@ const updateAnimeCard = async () => {
   }
 };
 
-const deleteAnimeCard = async () => {
+const deleteMangaCard = async () => {
   try {
     isLoading.value = true;
     const res = await axios.delete(
-      `https://anime-vue-go-client-production.up.railway.app/delete/anime/${animeID.value}`,
+      `https://anime-vue-go-client-production.up.railway.app/delete/manga/${mangaID.value}`,
       {
         withCredentials: true,
       }
     );
     if (res.status >= 200 && res.status <= 209) {
-      getAnimeList();
+      getMangaList();
     }
   } catch (error) {
     console.error(error);
@@ -425,7 +424,7 @@ const deleteAnimeCard = async () => {
 onBeforeMount(() => {
   if (!checkIfDataFetched.value) {
     checkIfDataFetched.value = true;
-    getAnimeList();
+    getMangaList();
     // let i = 0;
     // let j = 0;
     // let forward = true;
@@ -453,16 +452,25 @@ onBeforeMount(() => {
   }
 });
 
-const findAnimeByID = async (id) => {
+const findMangaByID = async (id) => {
   try {
     const res = await axios.get(
-      `https://kitsu.io/api/edge/anime?filter[id]=${id}&page[limit]=1`
+      `https://kitsu.io/api/edge/manga?filter[id]=${id}&page[limit]=1`
     );
-    singleAnimeData.value = res.data.data[0];
+    singleMangaData.value = res.data.data[0];
   } catch (error) {
     console.error(error);
   }
 };
+
+// watch(
+//   () => mangaListData.value,
+//   () => {
+//     isEditing.value = null;
+//     isLoadingAdding.value = false;
+//     addingResponse.value = null;
+//   }
+// );
 </script>
 
 <style scoped>

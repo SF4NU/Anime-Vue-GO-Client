@@ -41,6 +41,11 @@ const routes = [
     name: "MyList",
     component: () => import(".././views/MyList/MyList.vue"),
   },
+  {
+    path: "/mymangalist/:userId",
+    name: "MyMangaList",
+    component: () => import(".././views/MyList/MyMangaList.vue"),
+  },
 ];
 
 const router = createRouter({
