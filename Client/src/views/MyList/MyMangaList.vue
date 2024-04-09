@@ -221,6 +221,7 @@ const singleMangaData = ref(null);
 // };
 
 const setCountersToZero = () => {
+  //la funzione resetta tutte le variabili che l'utente modifica nel client (quando serve)
   chapters.value = 0;
   rating.value = 1;
   finished.value = false;
@@ -231,6 +232,7 @@ const setCountersToZero = () => {
 };
 
 const displayTextArea = () => {
+  //questo pulsante toglie la finestra dei commenti
   displayText.value = !displayText.value;
 };
 
@@ -239,10 +241,12 @@ const updateLengthCounter = () => {
 };
 
 const unreverseDate = (date) => {
+  //rimette la data in formato (mm/dd/yyyy)
   return date.split("-").reverse().join("-");
 };
 
 const handleIsEditing = async (i, id) => {
+  //inizia la sessione per fare modifiche all'anime su cui si è cliccato
   if (isEditing.value === i) {
     isEditing.value = null;
     setCountersToZero();
@@ -265,6 +269,7 @@ const handleIsEditing = async (i, id) => {
 };
 
 const checkIfMangaCompleted = (maxEp) => {
+  //controlla se i capitoli del manga sono al massimo per cambiare da maxEp a finito
   if (chapters.value > maxEp - 1 || chapters.value === "Finito") {
     finished.value = true;
     if (chapters.value !== "Finito") {
@@ -278,6 +283,7 @@ const checkIfMangaCompleted = (maxEp) => {
   finished.value = false;
 };
 const incrementChapterCount = (maxEp) => {
+  //per il pulsante che aumenta il numero di capitoli
   if (chapters.value >= maxEp - 1 || chapters.value === "Finito") {
     chapters.value = "Finito";
     checkIfMangaCompleted(maxEp);
@@ -287,6 +293,7 @@ const incrementChapterCount = (maxEp) => {
   chapters.value++;
 };
 const decrementChapterCount = (maxEp) => {
+  //diminuisce il numero di capitoli
   if (chapters.value <= 0) {
     chapters.value = 0;
     checkIfMangaCompleted(maxEp);
@@ -302,6 +309,7 @@ const decrementChapterCount = (maxEp) => {
 };
 
 const incrementUserRating = () => {
+  //per il pulsante che aumenta lo user score
   if (rating.value >= 10) {
     rating.value = 10;
     return;
@@ -310,6 +318,7 @@ const incrementUserRating = () => {
 };
 
 const decrementUserRating = () => {
+  //diminuisce lo user score
   if (rating.value <= 1) {
     rating.value = 1;
     return;
@@ -318,12 +327,14 @@ const decrementUserRating = () => {
 };
 
 const handleSubmitErrors = () => {
+  //imposta le variabili della sessione degli errori a zero
   isEditing.value = null;
   isLoading.value = false;
   addingResponse.value = null;
 };
 
 const getMangaList = async () => {
+  //fetch della lista di manga dell'utente
   try {
     const res = await axios.get(
       `https://anime-vue-go-client-production.up.railway.app/users/${userId.value}/manga`,
@@ -335,7 +346,6 @@ const getMangaList = async () => {
       mangaListData.value = res.data.sort((a, b) =>
         a.title.localeCompare(b.title)
       );
-      // placeholders.value = mangaListData.value.map((anime) => anime.title);
       isEditing.value = null;
       isLoading.value = false;
     } else {
@@ -346,10 +356,12 @@ const getMangaList = async () => {
 };
 
 const reverseDate = (date) => {
+  //formatta la data in formato italiana (dd/mm/yyyy)
   return date.split("-").reverse().join("-");
 };
 
 const updateMangaCard = async () => {
+  //aggiorna il manga con i nuovi dati inseriti dall'utente
   try {
     isLoading.value = true;
     const res = await axios.put(
@@ -396,6 +408,7 @@ const updateMangaCard = async () => {
 };
 
 const deleteMangaCard = async () => {
+  //rimuove il manga selezionato dall'utente
   try {
     isLoading.value = true;
     const res = await axios.delete(
@@ -422,6 +435,7 @@ const deleteMangaCard = async () => {
 };
 
 onBeforeMount(() => {
+  //al caricamento del componente fa il fetch di manga
   if (!checkIfDataFetched.value) {
     checkIfDataFetched.value = true;
     getMangaList();
@@ -453,6 +467,7 @@ onBeforeMount(() => {
 });
 
 const findMangaByID = async (id) => {
+  //trova il manga in base all'id
   try {
     const res = await axios.get(
       `https://kitsu.io/api/edge/manga?filter[id]=${id}&page[limit]=1`
