@@ -8,7 +8,7 @@ Anime-Vue-GO-Client è un'applicazione web creata per gli appassionati di anime 
 
 ## Funzionalità
 
-- **Registrazione e Autenticazione Utenti**: Utilizzando un backend robusto scritto in Go, supportato dal framework Fiber e GORM, Anime-Vue-GO-Client offre un'autenticazione e registrazione utente sicure. L'autenticazione basata su JWT garantisce l'integrità dei dati e la privacy degli utenti.
+- **Registrazione e Autenticazione Utenti**: Utilizzando un backend scritto in Go, supportato dal framework Fiber e GORM, Anime-Vue-GO-Client offre un'autenticazione e registrazione utente sicure. L'autenticazione basata su JWT garantisce l'integrità dei dati e la privacy degli utenti.
 ![Immagine 2024-04-12 124348](https://github.com/SF4NU/Anime-Vue-GO-Client/assets/129513838/3de4eb55-c507-40e7-8476-8360d4eac7a7)
 
 - **Liste Personalizzate**: Gli utenti possono creare liste personalizzate per tenere traccia di anime e manga che hanno visto o intendono vedere.
